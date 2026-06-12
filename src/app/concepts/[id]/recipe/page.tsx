@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { KitchenNotesField } from './KitchenNotesField'
+import { DeleteButton } from '@/components/ui/delete-button'
 
 type Component = { name: string; quantity: string; notes: string }
 type Yield = { serves: number; portion_size: string }
@@ -45,11 +46,19 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
 
       {/* Header */}
       <div className="mb-8">
-        <p className="text-[10px] uppercase tracking-[2px] text-ink-muted mb-1.5">
-          Prototype Recipe · V{recipe.version}
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <p className="text-[10px] uppercase tracking-[2px] text-ink-muted">
+            Prototype Recipe · V{recipe.version}
+          </p>
+          <div className="flex items-center gap-4 shrink-0">
+            <Link href={`/concepts/${id}/recipe/edit`} className="text-sm text-ink-muted hover:text-ink transition-colors">
+              Edit
+            </Link>
+            <DeleteButton table="rd_recipes" id={recipe.id} redirectTo={`/concepts/${id}`} />
+          </div>
+        </div>
         {recipe.concept_intent && (
-          <p className="text-sm text-ink-mid font-light leading-relaxed">{recipe.concept_intent}</p>
+          <p className="text-sm text-ink-mid font-light leading-relaxed mt-2">{recipe.concept_intent}</p>
         )}
       </div>
 

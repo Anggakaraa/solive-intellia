@@ -13,6 +13,8 @@ interface Props {
   categoryOptions: string[]
   roleOptions: string[]
   pantryOptions: string[]
+  briefId?: string
+  initialValues?: Partial<FormData>
 }
 
 type FormData = {
@@ -102,21 +104,21 @@ function FreeTextField({
 }
 
 
-export function BriefForm({ categoryOptions, roleOptions, pantryOptions }: Props) {
+export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId, initialValues }: Props) {
   const supabase = createClient()
   const router = useRouter()
   const [saving, setSaving] = useState(false)
 
   const [form, setForm] = useState<FormData>({
-    category: '',
-    strategic_roles: [],
-    format_familiarity: null,
-    flavor_discovery: null,
-    pantry_assets: [],
-    opportunity: '',
-    creative_references: '',
-    desired_feeling: '',
-    constraints: '',
+    category: initialValues?.category ?? '',
+    strategic_roles: initialValues?.strategic_roles ?? [],
+    format_familiarity: initialValues?.format_familiarity ?? null,
+    flavor_discovery: initialValues?.flavor_discovery ?? null,
+    pantry_assets: initialValues?.pantry_assets ?? [],
+    opportunity: initialValues?.opportunity ?? '',
+    creative_references: initialValues?.creative_references ?? '',
+    desired_feeling: initialValues?.desired_feeling ?? '',
+    constraints: initialValues?.constraints ?? '',
   })
 
   const set = <K extends keyof FormData>(key: K, value: FormData[K]) =>
@@ -142,15 +144,25 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions }: Props
       constraints: form.constraints || null,
     }
 
-    const { data, error } = await supabase.from('rd_briefs').insert(payload).select().single()
-    if (error || !data) {
-      toast.error(error?.message ?? 'Failed to save brief')
-      setSaving(false)
-      return
+    if (briefId) {
+      const { error } = await supabase.from('rd_briefs').update(payload).eq('id', briefId)
+      if (error) {
+        toast.error(error.message)
+        setSaving(false)
+        return
+      }
+      toast.success('Brief updated')
+      router.push(`/brief/${briefId}`)
+    } else {
+      const { data, error } = await supabase.from('rd_briefs').insert(payload).select().single()
+      if (error || !data) {
+        toast.error(error?.message ?? 'Failed to save brief')
+        setSaving(false)
+        return
+      }
+      toast.success('Brief captured')
+      router.push(`/brief/${data.id}`)
     }
-
-    toast.success('Brief captured')
-    router.push(`/brief/${data.id}`)
   }
 
   return (
@@ -252,7 +264,7 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions }: Props
           disabled={saving}
           className="bg-olive text-cream text-sm font-medium px-5 py-2.5 rounded-md hover:bg-olive-light transition-colors disabled:opacity-60"
         >
-          {saving ? 'Capturing…' : 'Capture brief'}
+          {saving ? 'Saving…' : briefId ? 'Save changes' : 'Capture brief'}
         </button>
       </div>
 

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { GenerateConceptButton } from './GenerateConceptButton'
+import { DeleteButton } from '@/components/ui/delete-button'
 
 function BriefField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -35,12 +36,22 @@ export default async function BriefDetailPage({ params }: { params: Promise<{ id
 
       <div className="mb-10">
         <p className="text-[10px] uppercase tracking-[2px] text-ink-muted mb-1.5">R&D Brief</p>
-        <h1 className="font-serif text-3xl font-normal text-ink tracking-tight leading-tight mb-1">
-          {brief.category ?? 'Untitled Brief'}
-        </h1>
-        <p className="text-sm text-ink-muted font-light">
-          {new Date(brief.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="font-serif text-3xl font-normal text-ink tracking-tight leading-tight mb-1">
+              {brief.category ?? 'Untitled Brief'}
+            </h1>
+            <p className="text-sm text-ink-muted font-light">
+              {new Date(brief.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </p>
+          </div>
+          <div className="flex items-center gap-4 mt-1 shrink-0">
+            <Link href={`/brief/${id}/edit`} className="text-sm text-ink-muted hover:text-ink transition-colors">
+              Edit
+            </Link>
+            <DeleteButton table="rd_briefs" id={id} redirectTo="/brief/history" />
+          </div>
+        </div>
       </div>
 
       {/* ── The Brief ── */}

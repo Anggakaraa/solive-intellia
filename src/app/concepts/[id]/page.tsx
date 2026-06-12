@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { GenerateRecipeButton } from './GenerateRecipeButton'
+import { DeleteButton } from '@/components/ui/delete-button'
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -60,12 +61,22 @@ export default async function ConceptDetailPage({ params }: { params: Promise<{ 
       {/* Header */}
       <div className="mb-8">
         <p className="text-[10px] uppercase tracking-[2px] text-ink-muted mb-1.5">Concept</p>
-        <h1 className="font-serif text-3xl font-normal text-ink tracking-tight leading-tight mb-2">
-          {concept.concept_name}
-        </h1>
-        {concept.one_line && (
-          <p className="text-sm text-ink-mid font-light leading-relaxed">{concept.one_line}</p>
-        )}
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="font-serif text-3xl font-normal text-ink tracking-tight leading-tight mb-2">
+              {concept.concept_name}
+            </h1>
+            {concept.one_line && (
+              <p className="text-sm text-ink-mid font-light leading-relaxed">{concept.one_line}</p>
+            )}
+          </div>
+          <div className="flex items-center gap-4 mt-1 shrink-0">
+            <Link href={`/concepts/${id}/edit`} className="text-sm text-ink-muted hover:text-ink transition-colors">
+              Edit
+            </Link>
+            <DeleteButton table="rd_concepts" id={id} redirectTo={`/brief/${concept.brief_id}`} />
+          </div>
+        </div>
       </div>
 
       <div className="space-y-3 mb-8">

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Textarea } from '@/components/ui/textarea'
+import { primaryBtnCls } from '@/lib/styles'
 
 interface Props {
   recipeId: string
@@ -45,7 +46,7 @@ export function KitchenNotesField({ recipeId, initialValue }: Props) {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="text-sm font-medium text-olive hover:text-olive-light transition-colors disabled:opacity-60"
+          className={primaryBtnCls}
         >
           {saving ? 'Saving…' : saved ? 'Saved ✓' : 'Save notes'}
         </button>

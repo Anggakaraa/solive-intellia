@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Sparkles } from 'lucide-react'
+import { primaryBtnCls } from '@/lib/styles'
 
 const mockRecipe = (conceptId: string, conceptIntent: string, successCriteria: string[]) => ({
   concept_id: conceptId,
@@ -72,7 +73,7 @@ export function GenerateRecipeButton({ conceptId, experimentFocus, conceptIntent
     <button
       onClick={handleGenerate}
       disabled={loading}
-      className="flex items-center gap-2 bg-olive text-cream text-sm font-medium px-4 py-2 rounded-md hover:bg-olive-light transition-colors disabled:opacity-60"
+      className={`flex items-center gap-2 ${primaryBtnCls}`}
     >
       <Sparkles size={14} />
       {loading ? 'Generating…' : 'Generate Prototype Recipe'}

@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
-import { PantryItemForm } from '../pantry-item-form'
-import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
 import { notFound } from 'next/navigation'
+import { BackLink } from '@/components/ui/back-link'
+import { PageHeader } from '@/components/ui/page-header'
+import { PantryItemForm } from '../pantry-item-form'
 
 export default async function EditPantryItemPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -18,18 +18,8 @@ export default async function EditPantryItemPage({ params }: { params: Promise<{
 
   return (
     <div>
-      <Link
-        href="/pantry-items"
-        className="flex items-center gap-1 text-[13px] text-ink-muted hover:text-ink mb-6 transition-colors"
-      >
-        <ChevronLeft size={14} /> Pantry Items
-      </Link>
-      <div className="mb-9">
-        <p className="text-[10px] uppercase tracking-[2px] text-ink-muted mb-1.5">Pantry Items</p>
-        <h1 className="font-serif text-3xl font-normal text-ink tracking-tight leading-tight">
-          {item.name}
-        </h1>
-      </div>
+      <BackLink href="/pantry-items" label="Pantry Items" />
+      <PageHeader eyebrow="Pantry Items" title={item.name} />
       <PantryItemForm
         item={item}
         flavorOptions={flavors?.map((f) => f.name) ?? []}

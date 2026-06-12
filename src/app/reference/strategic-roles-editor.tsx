@@ -8,10 +8,11 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { ChevronDown } from 'lucide-react'
 import type { StrategicRole } from '@/lib/supabase/types'
+import { catalogueInputCls, primaryBtnCls } from '@/lib/styles'
 
 interface Props { roles: StrategicRole[] }
 
-const inputCls = 'bg-cream-dark border-olive/20 rounded-md text-sm text-ink font-light placeholder:text-ink-muted focus-visible:ring-olive focus-visible:border-olive'
+const inputCls = catalogueInputCls
 
 export function StrategicRolesEditor({ roles }: Props) {
   const router = useRouter()
@@ -57,7 +58,7 @@ export function StrategicRolesEditor({ roles }: Props) {
         <button
           onClick={addNew}
           disabled={adding || !newName.trim()}
-          className="bg-olive text-cream text-sm font-medium px-4 py-2 rounded-md hover:bg-olive-light transition-colors disabled:opacity-50 shrink-0"
+          className={`${primaryBtnCls} shrink-0`}
         >
           Add
         </button>
@@ -70,8 +71,6 @@ function RoleCard({ role, onSave, onDelete }: { role: StrategicRole; onSave: (r:
   const [open, setOpen] = useState(false)
   const [data, setData] = useState(role)
   const set = (key: keyof StrategicRole, value: string) => setData((p) => ({ ...p, [key]: value }))
-
-  const inputCls = 'bg-cream-dark border-olive/20 rounded-md text-sm text-ink font-light placeholder:text-ink-muted focus-visible:ring-olive focus-visible:border-olive'
 
   return (
     <div className="bg-white border border-olive/15 rounded-lg overflow-hidden">
@@ -107,7 +106,7 @@ function RoleCard({ role, onSave, onDelete }: { role: StrategicRole; onSave: (r:
           <div className="flex gap-2 pt-1">
             <button
               onClick={() => onSave(data)}
-              className="bg-olive text-cream text-sm font-medium px-4 py-2 rounded-md hover:bg-olive-light transition-colors"
+              className={primaryBtnCls}
             >
               Save
             </button>

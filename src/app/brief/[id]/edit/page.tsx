@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
+import { BackLink } from '@/components/ui/back-link'
+import { PageHeader } from '@/components/ui/page-header'
 import { BriefForm } from '../../brief-form'
 
 export default async function EditBriefPage({ params }: { params: Promise<{ id: string }> }) {
@@ -19,19 +19,12 @@ export default async function EditBriefPage({ params }: { params: Promise<{ id: 
 
   return (
     <div>
-      <Link
-        href={`/brief/${id}`}
-        className="flex items-center gap-1 text-[13px] text-ink-muted hover:text-ink mb-6 transition-colors"
-      >
-        <ChevronLeft size={14} /> Brief
-      </Link>
+      <BackLink href={`/brief/${id}`} label="Brief" />
 
-      <div className="mb-9">
-        <p className="text-[10px] uppercase tracking-[2px] text-ink-muted mb-1.5">Edit Brief</p>
-        <h1 className="font-serif text-3xl font-normal text-ink tracking-tight leading-tight">
-          {brief.category ?? 'Untitled Brief'}
-        </h1>
-      </div>
+      <PageHeader
+        eyebrow="Edit Brief"
+        title={brief.category ?? 'Untitled Brief'}
+      />
 
       <BriefForm
         briefId={id}

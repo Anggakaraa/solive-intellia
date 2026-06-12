@@ -3,6 +3,23 @@
 
 ---
 
+## Rules of Use
+
+### Using existing components
+Every component listed in this file has a single source of truth in `src/components/`. Always import from there. If you are about to write a local component definition that matches something already in this document — stop, import instead.
+
+### Adding new components
+New components **must be approved before they are built**. The process:
+
+1. **Describe the need** — what does it do, which page(s) will use it, what data does it display
+2. **Propose the design** — describe the visual appearance (size, spacing, color tokens) and the component API (prop names, variants)
+3. **Wait for confirmation** — do not write code until the user has approved the design
+4. **Build + document** — once approved, create the file in `src/components/` and add the full spec to this document
+
+This applies to every new UI pattern, no matter how small. A two-line local helper today becomes an undocumented divergence tomorrow.
+
+---
+
 ## Design Philosophy
 
 Intellia is an internal R&D tool for a Mediterranean restaurant group. The visual language should feel like a well-designed editorial object — calm, considered, ingredient-forward. Not a SaaS dashboard. Not a recipe app.
@@ -376,15 +393,46 @@ Single-select pill group. Currently defined as a local component inside `brief-f
 
 ## Button Patterns
 
-The shadcn `Button` component exists but uses generic tokens. Use raw `<button>` elements with these class patterns until `Button` is aligned to the design system:
+All button styles are exported from `src/lib/styles.ts`. Import the right variant — never write raw button classes inline.
 
-| Role | Classes |
-|---|---|
-| Primary CTA | `bg-olive text-cream text-sm font-medium px-5 py-2.5 rounded-md hover:bg-olive-light transition-colors disabled:opacity-60` |
-| Ghost / text | `text-olive text-sm font-medium hover:text-olive-light transition-colors` |
-| Muted / secondary | `text-ink-muted text-sm hover:text-ink transition-colors` |
-| Destructive | `text-ink-muted text-sm hover:text-pimento transition-colors` |
-| Icon + label | Add `flex items-center gap-2` to any of the above |
+**The rule: context + role determines variant.**
+
+Two contexts:
+- **Inline** — button sits alongside content (page headers, confirmation text). Text-only, no border.
+- **Form footer** — button sits in a row with other buttons. Outlined or filled for visual weight.
+
+| Export | Context | Role | Looks like |
+|---|---|---|---|
+| `primaryBtnCls` | Both | Main constructive action | Filled olive, cream text |
+| `ghostBtnCls` | Inline | Secondary forward action | Text olive, no border |
+| `mutedBtnCls` | Inline | Neutral action | Text ink-muted → ink |
+| `destructiveBtnCls` | Inline | Destructive action | Text ink-muted → pimento |
+| `outlinedBtnCls` | Form footer | Cancel / secondary | Olive border, transparent bg |
+| `outlinedDestructiveBtnCls` | Form footer | Delete in a row | Pimento border, transparent bg |
+
+```tsx
+import {
+  primaryBtnCls, ghostBtnCls,
+  mutedBtnCls, destructiveBtnCls,
+  outlinedBtnCls, outlinedDestructiveBtnCls
+} from '@/lib/styles'
+
+// Page header — text-only (inline context)
+<Link href=".../edit" className={mutedBtnCls}>Edit</Link>
+<DeleteButton ... />  // uses destructiveBtnCls internally
+
+// Form footer — outlined row (form footer context)
+<button className={outlinedBtnCls} onClick={router.back()}>Cancel</button>
+<button className={outlinedDestructiveBtnCls} onClick={handleDelete}>Delete</button>
+<button className={primaryBtnCls} type="submit">Save</button>
+
+// With an icon — add flex wrapper
+<button className={`flex items-center gap-2 ${primaryBtnCls}`}>
+  <Sparkles size={14} /> Generate
+</button>
+```
+
+**Never use `red-500` or `red-600`.** Always `pimento` via `destructiveBtnCls` or `outlinedDestructiveBtnCls`.
 
 ---
 

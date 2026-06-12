@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { PageHeader } from '@/components/ui/page-header'
 import { BriefForm } from './brief-form'
 
 export default async function BriefPage() {
@@ -16,15 +17,11 @@ export default async function BriefPage() {
 
   return (
     <div>
-      <div className="mb-9">
-        <p className="text-[10px] uppercase tracking-[2px] text-ink-muted mb-1.5">Intelligence</p>
-        <h1 className="font-serif text-3xl font-normal text-ink tracking-tight leading-tight">
-          R&D Brief
-        </h1>
-        <p className="text-sm text-ink-mid font-light mt-1.5">
-          Articulate a concept direction. The intelligence layer will do the rest.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Intelligence"
+        title="R&D Brief"
+        subtitle="Articulate a concept direction. The intelligence layer will do the rest."
+      />
 
       <BriefForm
         categoryOptions={categories?.map((c) => c.name) ?? []}

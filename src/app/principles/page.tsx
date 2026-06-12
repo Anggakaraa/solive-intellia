@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { PageHeader } from '@/components/ui/page-header'
 import { PrinciplesClient } from './principles-client'
 import type { IdentityPrinciple } from '@/lib/supabase/types'
 
@@ -34,15 +35,11 @@ export default async function PrinciplesPage() {
 
   return (
     <div>
-      <div className="mb-9">
-        <p className="text-[10px] uppercase tracking-[2px] text-ink-muted mb-1.5">Knowledge</p>
-        <h1 className="font-serif text-3xl font-normal text-ink tracking-tight leading-tight">
-          Principles
-        </h1>
-        <p className="text-sm text-ink-mid font-light mt-1.5">
-          The framework that guides every dish and menu decision at Salted Olive.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Knowledge"
+        title="Principles"
+        subtitle="The framework that guides every dish and menu decision at Salted Olive."
+      />
       <PrinciplesClient levels={ordered} />
     </div>
   )

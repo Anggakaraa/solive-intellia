@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PageHeader } from '@/components/ui/page-header'
 import { SimpleListEditor } from './simple-list-editor'
 import { StrategicRolesEditor } from './strategic-roles-editor'
 
@@ -20,15 +21,11 @@ export default async function ReferencePage() {
 
   return (
     <div>
-      <div className="mb-9">
-        <p className="text-[10px] uppercase tracking-[2px] text-ink-muted mb-1.5">Knowledge</p>
-        <h1 className="font-serif text-3xl font-normal text-ink tracking-tight leading-tight">
-          Reference Data
-        </h1>
-        <p className="text-sm text-ink-mid font-light mt-1.5">
-          Manage the data tags used when entering menu and pantry items.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Knowledge"
+        title="Reference Data"
+        subtitle="Manage the data tags used when entering menu and pantry items."
+      />
 
       <Tabs defaultValue="roles">
         <TabsList className="flex gap-0 bg-transparent border-b border-olive/15 rounded-none h-auto mb-8 p-0 w-full">

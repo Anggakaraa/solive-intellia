@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { primaryBtnCls } from '@/lib/styles'
 
 interface Item { id: string; name: string }
 
@@ -66,7 +67,7 @@ export function SimpleListEditor({ table, items, label }: Props) {
         <button
           onClick={add}
           disabled={adding || !newName.trim()}
-          className="bg-olive text-cream text-sm font-medium px-4 py-2 rounded-md hover:bg-olive-light transition-colors disabled:opacity-50 shrink-0"
+          className={`${primaryBtnCls} shrink-0`}
         >
           Add
         </button>

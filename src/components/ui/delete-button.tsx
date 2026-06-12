@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { mutedBtnCls, destructiveBtnCls } from '@/lib/styles'
 
 interface Props {
   table: 'rd_briefs' | 'rd_concepts' | 'rd_recipes'
@@ -37,13 +38,13 @@ export function DeleteButton({ table, id, redirectTo, label = 'Delete' }: Props)
         <button
           onClick={handleDelete}
           disabled={deleting}
-          className="text-red-500 font-medium hover:text-red-600 transition-colors disabled:opacity-60"
+          className={destructiveBtnCls}
         >
           {deleting ? 'Deleting…' : 'Confirm'}
         </button>
         <button
           onClick={() => setConfirming(false)}
-          className="text-ink-muted hover:text-ink transition-colors"
+          className={mutedBtnCls}
         >
           Cancel
         </button>
@@ -54,7 +55,7 @@ export function DeleteButton({ table, id, redirectTo, label = 'Delete' }: Props)
   return (
     <button
       onClick={() => setConfirming(true)}
-      className="text-sm text-ink-muted hover:text-red-500 transition-colors"
+      className={destructiveBtnCls}
     >
       {label}
     </button>

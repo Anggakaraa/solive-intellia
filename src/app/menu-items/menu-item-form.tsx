@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MultiSelect } from '@/components/forms/multi-select'
 import { ScoreSlider } from '@/components/forms/score-slider'
+import { Field } from '@/components/forms/field'
+import { catalogueInputCls, primaryBtnCls, outlinedBtnCls, outlinedDestructiveBtnCls } from '@/lib/styles'
 import { toast } from 'sonner'
 import type { MenuItem } from '@/lib/supabase/types'
 
@@ -35,7 +37,7 @@ type FormData = {
   flavor_discovery: number | null
 }
 
-const inputCls = 'bg-cream-dark border-olive/20 rounded-md text-sm text-ink font-light placeholder:text-ink-muted focus-visible:ring-olive focus-visible:border-olive'
+const inputCls = catalogueInputCls
 
 function SectionHeader({ label }: { label: string }) {
   return (
@@ -46,15 +48,6 @@ function SectionHeader({ label }: { label: string }) {
   )
 }
 
-function Field({ label, helper, children }: { label: string; helper?: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-[13px] font-medium text-ink">{label}</label>
-      {helper && <p className="text-[11px] text-ink-muted -mt-0.5">{helper}</p>}
-      {children}
-    </div>
-  )
-}
 
 export function MenuItemForm({
   item,
@@ -296,7 +289,7 @@ export function MenuItemForm({
         <button
           type="button"
           onClick={() => router.back()}
-          className="border border-olive/30 text-ink-mid text-sm font-medium px-4 py-2 rounded-md bg-transparent hover:border-olive/60 hover:text-ink transition-colors"
+          className={outlinedBtnCls}
         >
           Cancel
         </button>
@@ -304,7 +297,7 @@ export function MenuItemForm({
           <button
             type="button"
             onClick={handleDelete}
-            className="border border-pimento/30 text-pimento text-sm font-medium px-4 py-2 rounded-md bg-transparent hover:bg-pimento/5 transition-colors"
+            className={outlinedDestructiveBtnCls}
           >
             Delete
           </button>
@@ -312,7 +305,7 @@ export function MenuItemForm({
         <button
           type="submit"
           disabled={saving}
-          className="bg-olive text-cream text-sm font-medium px-4 py-2 rounded-md hover:bg-olive-light transition-colors disabled:opacity-60"
+          className={primaryBtnCls}
         >
           {saving ? 'Saving…' : 'Save'}
         </button>

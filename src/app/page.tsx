@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { UtensilsCrossed, ShoppingBasket } from 'lucide-react'
+import { PageHeader } from '@/components/ui/page-header'
+import { StatusBadge } from '@/components/ui/status-badge'
 
 function ScoreDots({ value, max = 5 }: { value: number | null; max?: number }) {
   if (value == null) return null
@@ -33,25 +35,13 @@ export default async function DashboardPage() {
       .limit(5),
   ])
 
-  const statusClass: Record<string, string> = {
-    active:      'bg-[#EAF3DE] text-[#3B6D11]',
-    concept:     'bg-[#FAEEDA] text-[#854F0B]',
-    inspiration: 'bg-[#EAE8F5] text-[#4A3F82]',
-    inactive:    'bg-[#F1EFE8] text-[#5F5E5A]',
-  }
-
   return (
-    <div className="relative">
-      {/* Page header */}
-      <div className="mb-9">
-        <p className="text-[10px] uppercase tracking-[2px] text-ink-muted mb-1.5">Intellia</p>
-        <h1 className="font-serif text-3xl font-normal text-ink tracking-tight leading-tight">
-          Overview
-        </h1>
-        <p className="text-sm text-ink-mid font-light mt-1.5">
-          R&D Intelligence for a better world
-        </p>
-      </div>
+    <div>
+      <PageHeader
+        eyebrow="Intellia"
+        title="Overview"
+        subtitle="R&D Intelligence for a better world"
+      />
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 gap-3.5 mb-8">
@@ -111,7 +101,7 @@ export default async function DashboardPage() {
           <div className="space-y-2">
             {recentItems.map((item) => (
               <Link key={item.id} href={`/menu-items/${item.id}`} className={item.status !== 'active' ? 'opacity-50' : ''}>
-                <div className="bg-white border border-olive/15 rounded-lg px-4 py-3 flex items-center gap-4 mb-2 hover:border-olive/25 transition-colors cursor-pointer">
+                <div className="bg-white border border-olive/15 rounded-lg px-4 py-3 flex items-center gap-4 hover:border-olive/25 transition-colors cursor-pointer">
                   <div className="flex-1 min-w-0">
                     <p className="font-serif text-[15px] font-normal text-ink mb-1.5">{item.name}</p>
                     <div className="flex items-center gap-1.5">
@@ -129,9 +119,7 @@ export default async function DashboardPage() {
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
                     {item.status && (
-                      <span className={`text-[10px] tracking-[0.5px] font-medium px-2.5 py-1 rounded-full ${statusClass[item.status] ?? statusClass.inactive}`}>
-                        {item.status}
-                      </span>
+                      <StatusBadge status={item.status} />
                     )}
                     <div className="flex flex-col gap-1">
                       {item.format_familiarity != null && (

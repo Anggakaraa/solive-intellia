@@ -1,6 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { ChevronRight, Sparkles } from 'lucide-react'
+import { PageHeader } from '@/components/ui/page-header'
+import { Pill } from '@/components/ui/pill'
+import { ghostBtnCls } from '@/lib/styles'
 
 export default async function BriefHistoryPage() {
   const supabase = await createClient()
@@ -12,22 +15,18 @@ export default async function BriefHistoryPage() {
 
   return (
     <div>
-      <div className="mb-9">
-        <p className="text-[10px] uppercase tracking-[2px] text-ink-muted mb-1.5">Intelligence</p>
-        <h1 className="font-serif text-3xl font-normal text-ink tracking-tight leading-tight">
-          Brief History
-        </h1>
-        <p className="text-sm text-ink-mid font-light mt-1.5">
-          All R&D briefs submitted through the intelligence layer.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Intelligence"
+        title="Brief History"
+        subtitle="All R&D briefs submitted through the intelligence layer."
+      />
 
       {!briefs || briefs.length === 0 ? (
         <div className="text-center py-16 text-ink-muted">
           <p className="text-sm font-light">No briefs submitted yet.</p>
           <Link
             href="/brief"
-            className="mt-3 inline-block text-sm text-olive hover:underline"
+            className={`mt-3 inline-block ${ghostBtnCls}`}
           >
             Submit your first brief →
           </Link>
@@ -43,14 +42,10 @@ export default async function BriefHistoryPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1.5">
                   {brief.category && (
-                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-olive text-cream">
-                      {brief.category}
-                    </span>
+                    <Pill variant="olive">{brief.category}</Pill>
                   )}
                   {brief.strategic_roles?.map((r: string) => (
-                    <span key={r} className="text-[11px] px-2 py-0.5 rounded-full border border-olive/20 text-ink-mid">
-                      {r}
-                    </span>
+                    <Pill key={r} variant="default">{r}</Pill>
                   ))}
                   <span className="text-[11px] text-ink-muted ml-auto">
                     {new Date(brief.created_at).toLocaleDateString('en-AU', {

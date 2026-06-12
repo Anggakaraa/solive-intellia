@@ -4,20 +4,9 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Textarea } from '@/components/ui/textarea'
+import { Field } from '@/components/forms/field'
+import { inputCls, textareaCls, primaryBtnCls } from '@/lib/styles'
 import { toast } from 'sonner'
-
-const inputCls = 'w-full bg-white border border-olive/20 rounded-md text-sm text-ink font-light px-3 py-2 placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-olive focus:border-olive'
-const textareaCls = 'bg-white border-olive/20 rounded-md text-sm text-ink font-light placeholder:text-ink-muted focus-visible:ring-olive focus-visible:border-olive resize-none'
-
-function Field({ label, helper, children }: { label: string; helper?: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-[13px] font-medium text-ink">{label}</label>
-      {helper && <p className="text-[11px] text-ink-muted">{helper}</p>}
-      {children}
-    </div>
-  )
-}
 
 type Component = { name: string; quantity: string; notes: string }
 
@@ -139,7 +128,7 @@ export function RecipeEditForm({ conceptId, recipe }: Props) {
         <button
           type="submit"
           disabled={saving}
-          className="bg-olive text-cream text-sm font-medium px-5 py-2.5 rounded-md hover:bg-olive-light transition-colors disabled:opacity-60"
+          className={primaryBtnCls}
         >
           {saving ? 'Saving…' : 'Save changes'}
         </button>

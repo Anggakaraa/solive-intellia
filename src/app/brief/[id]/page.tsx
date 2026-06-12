@@ -1,9 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { GenerateConceptButton } from './GenerateConceptButton'
+import { ChevronRight } from 'lucide-react'
+import { BackLink } from '@/components/ui/back-link'
+import { PageHeader } from '@/components/ui/page-header'
+import { Pill } from '@/components/ui/pill'
+import { StatusBadge } from '@/components/ui/status-badge'
+import { SectionCard } from '@/components/ui/section-card'
 import { DeleteButton } from '@/components/ui/delete-button'
+import { mutedBtnCls } from '@/lib/styles'
+import { GenerateConceptButton } from './GenerateConceptButton'
 
 function BriefField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -25,59 +31,46 @@ export default async function BriefDetailPage({ params }: { params: Promise<{ id
 
   if (!brief) notFound()
 
+  const dateStr = new Date(brief.created_at).toLocaleDateString('en-AU', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+
   return (
     <div className="max-w-2xl">
-      <Link
-        href="/brief/history"
-        className="flex items-center gap-1 text-[13px] text-ink-muted hover:text-ink mb-6 transition-colors"
-      >
-        <ChevronLeft size={14} /> Brief History
-      </Link>
+      <BackLink href="/brief/history" label="Brief History" />
 
-      <div className="mb-10">
-        <p className="text-[10px] uppercase tracking-[2px] text-ink-muted mb-1.5">R&D Brief</p>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="font-serif text-3xl font-normal text-ink tracking-tight leading-tight mb-1">
-              {brief.category ?? 'Untitled Brief'}
-            </h1>
-            <p className="text-sm text-ink-muted font-light">
-              {new Date(brief.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}
-            </p>
-          </div>
-          <div className="flex items-center gap-4 mt-1 shrink-0">
-            <Link href={`/brief/${id}/edit`} className="text-sm text-ink-muted hover:text-ink transition-colors">
+      <PageHeader
+        eyebrow="R&D Brief"
+        title={brief.category ?? 'Untitled Brief'}
+        subtitle={dateStr}
+        actions={
+          <>
+            <Link href={`/brief/${id}/edit`} className={mutedBtnCls}>
               Edit
             </Link>
             <DeleteButton table="rd_briefs" id={id} redirectTo="/brief/history" />
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* ── The Brief ── */}
-      <div className="bg-white border border-olive/15 rounded-lg p-5 space-y-5 mb-8">
+      <SectionCard className="space-y-5 mb-8">
 
         {(brief.category || brief.strategic_roles?.length > 0) && (
           <div className="flex flex-wrap gap-2">
             {brief.category && (
-              <span className="text-[11px] px-2.5 py-1 rounded-full bg-olive text-cream">
-                {brief.category}
-              </span>
+              <Pill variant="olive">{brief.category}</Pill>
             )}
             {brief.strategic_roles?.map((r: string) => (
-              <span key={r} className="text-[11px] px-2.5 py-1 rounded-full border border-olive/20 text-ink-mid">
-                {r}
-              </span>
+              <Pill key={r} variant="default">{r}</Pill>
             ))}
             {brief.format_familiarity != null && (
-              <span className="text-[11px] px-2.5 py-1 rounded-full bg-cream-dark text-ink-mid">
-                FF {brief.format_familiarity}
-              </span>
+              <Pill variant="cream">FF {brief.format_familiarity}</Pill>
             )}
             {brief.flavor_discovery != null && (
-              <span className="text-[11px] px-2.5 py-1 rounded-full bg-cream-dark text-ink-mid">
-                FD {brief.flavor_discovery}
-              </span>
+              <Pill variant="cream">FD {brief.flavor_discovery}</Pill>
             )}
           </div>
         )}
@@ -86,9 +79,7 @@ export default async function BriefDetailPage({ params }: { params: Promise<{ id
           <BriefField label="Pantry Assets">
             <div className="flex flex-wrap gap-1.5 mt-0.5">
               {brief.pantry_assets.map((p: string) => (
-                <span key={p} className="text-[11px] px-2 py-0.5 rounded-full bg-cream-dark text-ink-mid">
-                  {p}
-                </span>
+                <Pill key={p} variant="cream">{p}</Pill>
               ))}
             </div>
           </BriefField>
@@ -117,7 +108,7 @@ export default async function BriefDetailPage({ params }: { params: Promise<{ id
             <p className="whitespace-pre-wrap">{brief.constraints}</p>
           </BriefField>
         )}
-      </div>
+      </SectionCard>
 
       {/* ── Concepts ── */}
       <div>
@@ -160,27 +151,5 @@ export default async function BriefDetailPage({ params }: { params: Promise<{ id
         )}
       </div>
     </div>
-  )
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    draft: 'bg-cream-dark text-ink-muted',
-    saved: 'bg-olive-faint text-olive',
-    recipe_generated: 'bg-olive-faint text-olive',
-    kitchen_tested: 'bg-[#EAF3DE] text-[#3B6D11]',
-    validated: 'bg-[#EAF3DE] text-[#3B6D11]',
-  }
-  const labels: Record<string, string> = {
-    draft: 'Draft',
-    saved: 'Saved',
-    recipe_generated: 'Recipe ready',
-    kitchen_tested: 'Kitchen tested',
-    validated: 'Validated',
-  }
-  return (
-    <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${styles[status] ?? styles.draft}`}>
-      {labels[status] ?? status}
-    </span>
   )
 }

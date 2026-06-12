@@ -1,12 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-
-const statusClass: Record<string, string> = {
-  active:      'bg-[#EAF3DE] text-[#3B6D11]',
-  concept:     'bg-[#FAEEDA] text-[#854F0B]',
-  inspiration: 'bg-[#EAE8F5] text-[#4A3F82]',
-  inactive:    'bg-[#F1EFE8] text-[#5F5E5A]',
-}
+import { PageHeader } from '@/components/ui/page-header'
+import { StatusBadge } from '@/components/ui/status-badge'
+import { primaryBtnCls } from '@/lib/styles'
 
 export default async function PantryItemsPage() {
   const supabase = await createClient()
@@ -16,21 +12,20 @@ export default async function PantryItemsPage() {
     .order('name')
 
   return (
-    <div className="relative">
-      <div className="mb-9">
-        <p className="text-[10px] uppercase tracking-[2px] text-ink-muted mb-1.5">Catalogue</p>
-        <h1 className="font-serif text-3xl font-normal text-ink tracking-tight leading-tight">
-          Pantry items
-        </h1>
-        <p className="text-sm text-ink-mid font-light mt-1.5">{items?.length ?? 0} items</p>
-      </div>
-
-      <Link
-        href="/pantry-items/new"
-        className="absolute top-0 right-0 bg-olive text-cream text-sm font-medium px-4 py-2 rounded-md hover:bg-olive-light transition-colors"
-      >
-        Add item
-      </Link>
+    <div>
+      <PageHeader
+        eyebrow="Catalogue"
+        title="Pantry items"
+        subtitle={`${items?.length ?? 0} items`}
+        actions={
+          <Link
+            href="/pantry-items/new"
+            className={primaryBtnCls}
+          >
+            Add item
+          </Link>
+        }
+      />
 
       {items?.length === 0 ? (
         <div className="text-center py-16 text-ink-muted">
@@ -65,9 +60,7 @@ export default async function PantryItemsPage() {
                   </div>
                   <div className="shrink-0">
                     {item.status && item.status !== 'active' && (
-                      <span className={`text-[10px] tracking-[0.5px] font-medium px-2.5 py-1 rounded-full ${statusClass[item.status] ?? statusClass.inactive}`}>
-                        {item.status}
-                      </span>
+                      <StatusBadge status={item.status} />
                     )}
                   </div>
                 </div>

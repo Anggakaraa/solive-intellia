@@ -6,8 +6,11 @@ import { createClient } from '@/lib/supabase/client'
 import { Textarea } from '@/components/ui/textarea'
 import { MultiSelect } from '@/components/forms/multi-select'
 import { ScoreSlider } from '@/components/forms/score-slider'
+import { Field } from '@/components/forms/field'
+import { PillSelect } from '@/components/forms/pill-select'
+import { SectionLabel } from '@/components/ui/section-label'
+import { textareaCls, primaryBtnCls } from '@/lib/styles'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
 
 interface Props {
   categoryOptions: string[]
@@ -29,49 +32,6 @@ type FormData = {
   constraints: string
 }
 
-const textareaCls = 'bg-white border-olive/20 rounded-md text-sm text-ink font-light placeholder:text-ink-muted focus-visible:ring-olive focus-visible:border-olive resize-none'
-
-function SectionLabel({ label }: { label: string }) {
-  return (
-    <div className="flex items-center gap-3 mb-6">
-      <div className="h-px flex-1 bg-olive/15" />
-      <p className="text-[10px] uppercase tracking-[2px] text-ink-muted shrink-0">{label}</p>
-      <div className="h-px flex-1 bg-olive/15" />
-    </div>
-  )
-}
-
-function Field({ label, helper, children }: { label: string; helper?: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-[13px] font-medium text-ink">{label}</label>
-      {helper && <p className="text-[11px] text-ink-muted -mt-0.5">{helper}</p>}
-      {children}
-    </div>
-  )
-}
-
-function PillSelect({ options, value, onChange }: { options: string[]; value: string; onChange: (v: string) => void }) {
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {options.map((opt) => (
-        <button
-          key={opt}
-          type="button"
-          onClick={() => onChange(value === opt ? '' : opt)}
-          className={cn(
-            'text-[12px] px-2.5 py-1 rounded-full border transition-colors',
-            value === opt
-              ? 'bg-olive text-cream border-olive'
-              : 'bg-white text-ink-mid border-olive/20 hover:border-olive/50'
-          )}
-        >
-          {opt}
-        </button>
-      ))}
-    </div>
-  )
-}
 
 function FreeTextField({
   question,
@@ -170,7 +130,7 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
 
       {/* ── Context ── */}
       <div className="space-y-5">
-        <SectionLabel label="Context" />
+        <SectionLabel label="Context" className="mb-6" />
 
         <Field label="Category">
           <PillSelect
@@ -218,7 +178,7 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
 
       {/* ── The Brief ── */}
       <div className="space-y-8">
-        <SectionLabel label="The Brief" />
+        <SectionLabel label="The Brief" className="mb-6" />
 
         <FreeTextField
           question="What opportunity are we trying to capture?"
@@ -262,7 +222,7 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
         <button
           type="submit"
           disabled={saving}
-          className="bg-olive text-cream text-sm font-medium px-5 py-2.5 rounded-md hover:bg-olive-light transition-colors disabled:opacity-60"
+          className={primaryBtnCls}
         >
           {saving ? 'Saving…' : briefId ? 'Save changes' : 'Capture brief'}
         </button>

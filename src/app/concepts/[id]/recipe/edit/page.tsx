@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
+import { BackLink } from '@/components/ui/back-link'
+import { PageHeader } from '@/components/ui/page-header'
 import { RecipeEditForm } from './RecipeEditForm'
 
 export default async function EditRecipePage({ params }: { params: Promise<{ id: string }> }) {
@@ -20,19 +20,12 @@ export default async function EditRecipePage({ params }: { params: Promise<{ id:
 
   return (
     <div>
-      <Link
-        href={`/concepts/${id}/recipe`}
-        className="flex items-center gap-1 text-[13px] text-ink-muted hover:text-ink mb-6 transition-colors"
-      >
-        <ChevronLeft size={14} /> Recipe
-      </Link>
+      <BackLink href={`/concepts/${id}/recipe`} label="Recipe" />
 
-      <div className="mb-9">
-        <p className="text-[10px] uppercase tracking-[2px] text-ink-muted mb-1.5">Edit Recipe · V{recipe.version}</p>
-        <h1 className="font-serif text-3xl font-normal text-ink tracking-tight leading-tight">
-          Prototype Recipe
-        </h1>
-      </div>
+      <PageHeader
+        eyebrow={`Edit Recipe · V${recipe.version}`}
+        title="Prototype Recipe"
+      />
 
       <RecipeEditForm conceptId={id} recipe={recipe} />
     </div>

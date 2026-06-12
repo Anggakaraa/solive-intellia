@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
+import { BackLink } from '@/components/ui/back-link'
+import { PageHeader } from '@/components/ui/page-header'
 import { MenuItemForm } from '../menu-item-form'
-import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
 
 export default async function NewMenuItemPage() {
   const supabase = await createClient()
@@ -20,18 +20,8 @@ export default async function NewMenuItemPage() {
 
   return (
     <div>
-      <Link
-        href="/menu-items"
-        className="flex items-center gap-1 text-[13px] text-ink-muted hover:text-ink mb-6 transition-colors"
-      >
-        <ChevronLeft size={14} /> Menu Items
-      </Link>
-      <div className="mb-9">
-        <p className="text-[10px] uppercase tracking-[2px] text-ink-muted mb-1.5">Menu Items</p>
-        <h1 className="font-serif text-3xl font-normal text-ink tracking-tight leading-tight">
-          New menu item
-        </h1>
-      </div>
+      <BackLink href="/menu-items" label="Menu Items" />
+      <PageHeader eyebrow="Menu Items" title="New menu item" />
       <MenuItemForm
         categoryOptions={categories?.map((c) => c.name) ?? []}
         flavorOptions={flavors?.map((f) => f.name) ?? []}

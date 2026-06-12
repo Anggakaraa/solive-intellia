@@ -1,21 +1,14 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
-import { KitchenNotesField } from './KitchenNotesField'
+import { BackLink } from '@/components/ui/back-link'
+import { SectionCard } from '@/components/ui/section-card'
 import { DeleteButton } from '@/components/ui/delete-button'
+import { mutedBtnCls } from '@/lib/styles'
+import { KitchenNotesField } from './KitchenNotesField'
 
 type Component = { name: string; quantity: string; notes: string }
 type Yield = { serves: number; portion_size: string }
-
-function Section({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="bg-white border border-olive/15 rounded-lg p-5">
-      <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-3">{label}</p>
-      {children}
-    </div>
-  )
-}
 
 export default async function RecipePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -37,12 +30,7 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
 
   return (
     <div className="max-w-2xl">
-      <Link
-        href={`/concepts/${id}`}
-        className="flex items-center gap-1 text-[13px] text-ink-muted hover:text-ink mb-6 transition-colors"
-      >
-        <ChevronLeft size={14} /> Concept
-      </Link>
+      <BackLink href={`/concepts/${id}`} label="Concept" />
 
       {/* Header */}
       <div className="mb-8">
@@ -51,7 +39,7 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
             Prototype Recipe · V{recipe.version}
           </p>
           <div className="flex items-center gap-4 shrink-0">
-            <Link href={`/concepts/${id}/recipe/edit`} className="text-sm text-ink-muted hover:text-ink transition-colors">
+            <Link href={`/concepts/${id}/recipe/edit`} className={mutedBtnCls}>
               Edit
             </Link>
             <DeleteButton table="rd_recipes" id={recipe.id} redirectTo={`/concepts/${id}`} />
@@ -72,7 +60,7 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
 
         {/* Yield */}
         {yieldInfo && (
-          <Section label="Yield">
+          <SectionCard label="Yield">
             <div className="flex gap-8">
               <div>
                 <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-1">Serves</p>
@@ -83,12 +71,12 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
                 <p className="text-sm text-ink font-medium">{yieldInfo.portion_size}</p>
               </div>
             </div>
-          </Section>
+          </SectionCard>
         )}
 
         {/* Components */}
         {components.length > 0 && (
-          <Section label="Components">
+          <SectionCard label="Components">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-olive/10">
@@ -107,12 +95,12 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
                 ))}
               </tbody>
             </table>
-          </Section>
+          </SectionCard>
         )}
 
         {/* Method */}
         {recipe.method && recipe.method.length > 0 && (
-          <Section label="Method">
+          <SectionCard label="Method">
             <ol className="space-y-3">
               {recipe.method.map((step: string, i: number) => (
                 <li key={i} className="flex gap-3 text-sm text-ink font-light leading-relaxed">
@@ -121,19 +109,19 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
                 </li>
               ))}
             </ol>
-          </Section>
+          </SectionCard>
         )}
 
         {/* Plating Notes */}
         {recipe.plating_notes && (
-          <Section label="Plating Notes">
+          <SectionCard label="Plating Notes">
             <p className="text-sm text-ink font-light leading-relaxed">{recipe.plating_notes}</p>
-          </Section>
+          </SectionCard>
         )}
 
         {/* Success Criteria */}
         {recipe.success_criteria && recipe.success_criteria.length > 0 && (
-          <Section label="Success Criteria">
+          <SectionCard label="Success Criteria">
             <ul className="space-y-2">
               {recipe.success_criteria.map((c: string, i: number) => (
                 <li key={i} className="flex gap-2.5 text-sm text-ink font-light leading-relaxed">
@@ -142,15 +130,16 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
                 </li>
               ))}
             </ul>
-          </Section>
+          </SectionCard>
         )}
 
         {/* Test Kitchen Notes — human-entered */}
-        <div className="bg-white border border-olive/15 rounded-lg p-5">
-          <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-1">Test Kitchen Notes</p>
-          <p className="text-[11px] text-ink-muted font-light mb-3">Enter after prototyping. This becomes the longitudinal record.</p>
+        <SectionCard
+          label="Test Kitchen Notes"
+          helper="Enter after prototyping. This becomes the longitudinal record."
+        >
           <KitchenNotesField recipeId={recipe.id} initialValue={recipe.test_kitchen_notes ?? ''} />
-        </div>
+        </SectionCard>
 
       </div>
     </div>

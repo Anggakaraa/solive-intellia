@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { Sparkles } from 'lucide-react'
+import { primaryBtnCls, ghostBtnCls } from '@/lib/styles'
 
 // Placeholder concept — replaced by real AI output when connected
 const mockConcept = (briefId: string) => ({
@@ -65,10 +66,8 @@ export function GenerateConceptButton({ briefId, label, variant }: Props) {
       onClick={handleGenerate}
       disabled={loading}
       className={cn(
-        'flex items-center gap-2 text-sm font-medium transition-colors disabled:opacity-60',
-        variant === 'primary'
-          ? 'bg-olive text-cream px-5 py-2.5 rounded-md hover:bg-olive-light'
-          : 'text-olive hover:text-olive-light px-0 py-1'
+        'flex items-center gap-2',
+        variant === 'primary' ? primaryBtnCls : ghostBtnCls
       )}
     >
       <Sparkles size={14} />

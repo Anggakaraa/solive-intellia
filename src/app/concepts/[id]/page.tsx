@@ -1,30 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
-import { GenerateRecipeButton } from './GenerateRecipeButton'
+import { BackLink } from '@/components/ui/back-link'
+import { PageHeader } from '@/components/ui/page-header'
+import { SectionCard } from '@/components/ui/section-card'
+import { Pill } from '@/components/ui/pill'
 import { DeleteButton } from '@/components/ui/delete-button'
-
-function Section({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="bg-white border border-olive/15 rounded-lg p-5">
-      <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-3">{label}</p>
-      {children}
-    </div>
-  )
-}
-
-function Pill({ children, variant = 'default' }: { children: React.ReactNode; variant?: 'default' | 'cream' }) {
-  return (
-    <span className={`text-[11px] px-2.5 py-1 rounded-full border ${
-      variant === 'cream'
-        ? 'bg-cream-dark text-ink-mid border-transparent'
-        : 'bg-white text-ink-mid border-olive/20'
-    }`}>
-      {children}
-    </span>
-  )
-}
+import { mutedBtnCls, ghostBtnCls } from '@/lib/styles'
+import { GenerateRecipeButton } from './GenerateRecipeButton'
 
 export default async function ConceptDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -51,39 +34,27 @@ export default async function ConceptDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="max-w-2xl">
-      <Link
-        href={`/brief/${concept.brief_id}`}
-        className="flex items-center gap-1 text-[13px] text-ink-muted hover:text-ink mb-6 transition-colors"
-      >
-        <ChevronLeft size={14} /> Brief
-      </Link>
+      <BackLink href={`/brief/${concept.brief_id}`} label="Brief" />
 
-      {/* Header */}
-      <div className="mb-8">
-        <p className="text-[10px] uppercase tracking-[2px] text-ink-muted mb-1.5">Concept</p>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="font-serif text-3xl font-normal text-ink tracking-tight leading-tight mb-2">
-              {concept.concept_name}
-            </h1>
-            {concept.one_line && (
-              <p className="text-sm text-ink-mid font-light leading-relaxed">{concept.one_line}</p>
-            )}
-          </div>
-          <div className="flex items-center gap-4 mt-1 shrink-0">
-            <Link href={`/concepts/${id}/edit`} className="text-sm text-ink-muted hover:text-ink transition-colors">
+      <PageHeader
+        eyebrow="Concept"
+        title={concept.concept_name}
+        subtitle={concept.one_line ?? undefined}
+        actions={
+          <>
+            <Link href={`/concepts/${id}/edit`} className={mutedBtnCls}>
               Edit
             </Link>
             <DeleteButton table="rd_concepts" id={id} redirectTo={`/brief/${concept.brief_id}`} />
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <div className="space-y-3 mb-8">
 
         {/* Breakdown */}
         {breakdown && (
-          <Section label="Concept Breakdown">
+          <SectionCard label="Concept Breakdown">
             <div className="grid grid-cols-2 gap-4">
               {breakdown.hero && (
                 <div>
@@ -101,7 +72,7 @@ export default async function ConceptDetailPage({ params }: { params: Promise<{ 
                 <div>
                   <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-1.5">Flavor Drivers</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {breakdown.flavor_drivers.map((f) => <Pill key={f}>{f}</Pill>)}
+                    {breakdown.flavor_drivers.map((f) => <Pill key={f} variant="default">{f}</Pill>)}
                   </div>
                 </div>
               )}
@@ -114,26 +85,26 @@ export default async function ConceptDetailPage({ params }: { params: Promise<{ 
                 </div>
               )}
             </div>
-          </Section>
+          </SectionCard>
         )}
 
         {/* Presentation */}
         {concept.presentation && (
-          <Section label="Presentation & Service Moment">
+          <SectionCard label="Presentation & Service Moment">
             <p className="text-sm text-ink font-light leading-relaxed">{concept.presentation}</p>
-          </Section>
+          </SectionCard>
         )}
 
         {/* Why it could win */}
         {concept.why_it_could_win && (
-          <Section label="Why It Could Win">
+          <SectionCard label="Why It Could Win">
             <p className="text-sm text-ink font-light leading-relaxed">{concept.why_it_could_win}</p>
-          </Section>
+          </SectionCard>
         )}
 
         {/* Feasibility */}
         {feasibility && (
-          <Section label="Feasibility Notes">
+          <SectionCard label="Feasibility Notes">
             <div className="grid grid-cols-2 gap-4">
               {feasibility.assets_leveraged && feasibility.assets_leveraged.length > 0 && (
                 <div>
@@ -160,12 +131,12 @@ export default async function ConceptDetailPage({ params }: { params: Promise<{ 
                 </div>
               )}
             </div>
-          </Section>
+          </SectionCard>
         )}
 
         {/* Experiment Focus */}
         {concept.experiment_focus && concept.experiment_focus.length > 0 && (
-          <Section label="Experiment Focus">
+          <SectionCard label="Experiment Focus">
             <ol className="space-y-2.5">
               {concept.experiment_focus.map((q: string, i: number) => (
                 <li key={i} className="flex gap-3 text-sm text-ink font-light leading-relaxed">
@@ -174,7 +145,7 @@ export default async function ConceptDetailPage({ params }: { params: Promise<{ 
                 </li>
               ))}
             </ol>
-          </Section>
+          </SectionCard>
         )}
       </div>
 
@@ -188,7 +159,7 @@ export default async function ConceptDetailPage({ params }: { params: Promise<{ 
             </div>
             <Link
               href={`/concepts/${id}/recipe`}
-              className="text-sm font-medium text-olive hover:text-olive-light transition-colors"
+              className={ghostBtnCls}
             >
               View Recipe →
             </Link>

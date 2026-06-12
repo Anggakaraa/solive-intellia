@@ -12,6 +12,7 @@ import {
   Settings,
   Download,
   Lightbulb,
+  Clock,
 } from 'lucide-react'
 
 const sections = [
@@ -34,6 +35,7 @@ const sections = [
     label: 'Intelligence',
     items: [
       { href: '/brief', label: 'R&D Brief', icon: Lightbulb },
+      { href: '/brief/history', label: 'Brief History', icon: Clock },
     ],
   },
   {
@@ -47,8 +49,11 @@ const sections = [
 export function Sidebar() {
   const pathname = usePathname()
 
-  const isActive = (href: string) =>
-    href === '/' ? pathname === '/' : pathname.startsWith(href)
+  const isActive = (href: string) => {
+    if (href === '/') return pathname === '/'
+    if (href === '/brief') return pathname === '/brief'
+    return pathname.startsWith(href)
+  }
 
   return (
     <aside className="w-[220px] shrink-0 bg-olive flex flex-col min-h-screen">

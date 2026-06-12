@@ -1,36 +1,30 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Intellia — Salted Olive R&D Intelligence
 
-## Getting Started
+An internal web platform for capturing, organising, and analysing Salted Olive's menu R&D data. Built as the data foundation for Phase 2 AI-assisted menu intelligence.
 
-First, run the development server:
+## What it does
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Menu Items** — Document every dish with flavor identity, strategic role, hero component, and FF/FD experience scores
+- **Pantry Items** — Capture signature pantry products with flavor contributions, pairings, and applications
+- **Principles** — Browse the Salted Olive identity principles across three levels (Dish, Menu, Pantry Strategy)
+- **Reference Data** — Manage the controlled vocabularies (strategic roles, flavor taxonomy)
+- **Export** — Download all data as CSV or JSON for external analysis
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tech stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Next.js** (App Router) + TypeScript
+- **Supabase** (PostgreSQL, no auth, RLS disabled)
+- **Tailwind CSS v4** with custom olive/cream/ink design tokens
+- **Fraunces** (display serif) + **IBM Plex Sans** (body)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Setup
 
-## Learn More
+See [SETUP.md](SETUP.md).
 
-To learn more about Next.js, take a look at the following resources:
+## Data model
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+See [DATA.md](DATA.md) for the full schema reference, table relationships, and intelligence model.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Design system
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See [salted-olive-design-spec.md](salted-olive-design-spec.md) for the color tokens, typography, and component patterns.

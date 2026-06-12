@@ -132,6 +132,64 @@ Both `menu_items` and `pantry_items` draw from this same table. Flavors are flav
 
 ---
 
+### `rd_briefs`
+
+The intent layer of the intelligence system. Each brief captures a strategic direction the team wants to explore before any concept is generated.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | uuid | Primary key |
+| `category` | text | Target menu category |
+| `strategic_roles` | text[] | Target strategic roles (names from `strategic_roles`) |
+| `format_familiarity` | int (1–5) | Target FF position |
+| `flavor_discovery` | int (1–5) | Target FD position |
+| `pantry_assets` | text[] | Pantry products the concept should leverage |
+| `opportunity` | text | Why this concept should exist |
+| `creative_references` | text | Directional references (dishes, places, moods) |
+| `desired_feeling` | text | Emotional outcome for the guest |
+| `constraints` | text | What to avoid or work within |
+
+---
+
+### `rd_concepts`
+
+The intellectual property layer. The primary artifact produced by the intelligence system. A brief can produce multiple concepts. Concepts persist independently — they are the most valuable records in the system.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | uuid | Primary key |
+| `brief_id` | uuid | FK → `rd_briefs.id` (cascade delete) |
+| `concept_name` | text | Working title |
+| `one_line` | text | Single sentence: hero + flavor driver + format |
+| `breakdown` | jsonb | `{ hero, flavor_drivers: [], textures: [], key_contrast }` |
+| `presentation` | text | How the dish comes to life at the table |
+| `why_it_could_win` | text | Strategic and emotional case for the concept |
+| `feasibility` | jsonb | `{ assets_leveraged: [], watchouts: [] }` |
+| `experiment_focus` | text[] | The 2–4 assumptions that determine success |
+| `status` | text | `draft` → `saved` → `recipe_generated` → `kitchen_tested` → `validated` |
+
+---
+
+### `rd_recipes`
+
+The execution layer. Prototype recipes derived from a concept. A concept can produce multiple recipe versions (V1, V2, V3 as iterations refine the dish).
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | uuid | Primary key |
+| `concept_id` | uuid | FK → `rd_concepts.id` (cascade delete) |
+| `version` | integer | 1 = first prototype, increments with each revision |
+| `concept_intent` | text | Copied from concept at generation time — self-contained |
+| `components` | jsonb | `[{ name, quantity, notes }]` |
+| `method` | text[] | Ordered preparation steps |
+| `plating_notes` | text | How the dish should be presented |
+| `yield` | jsonb | `{ serves, portion_size }` |
+| `success_criteria` | text[] | Copied from `experiment_focus` at generation time |
+| `test_kitchen_notes` | text | Human-entered after prototyping — the longitudinal record |
+| `status` | text | `draft` → `tested` → `revised` → `approved` |
+
+---
+
 ## Dormant Tables
 
 These tables were scaffolded in the initial schema but are not currently wired into the UI. They represent planned capability that was deliberately parked in v1.
@@ -163,6 +221,12 @@ strategic_roles             ← menu_items.strategic_roles (text[])
 
 menu_items ──────────────── menu_item_pantry_links ──────────── pantry_items
                             (UUID FK both sides)
+
+Intelligence layer:
+
+rd_briefs
+    └── rd_concepts (brief_id FK, cascade delete)
+            └── rd_recipes (concept_id FK, cascade delete)
 ```
 
 **Denormalization note:** `category`, `primary_flavor_identity`, `secondary_flavor_identities`, and `strategic_roles` on `menu_items` all store names as plain text rather than UUID foreign keys. This was a v1 simplification — it keeps queries readable and the forms simple, but means renaming a category or role requires updating all menu item records. For the current scale (22 dishes) this is fine.

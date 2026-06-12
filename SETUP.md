@@ -17,6 +17,12 @@ supabase/migrations/005_principles_level2_3.sql   — add Level 2 and Level 3 pr
 supabase/migrations/006_menu_items_seed.sql       — seed 22 active menu items
 supabase/migrations/007_pantry_items_seed.sql     — seed 6 core pantry items
 supabase/migrations/008_pantry_links_and_array_fields.sql — junction table, convert array fields
+supabase/migrations/009_unify_flavor_vocabulary.sql       — merge pantry flavor into flavor_identities
+supabase/migrations/010_inspiration_category_and_pantry_category.sql — pantry categories
+supabase/migrations/011_status_inspiration_and_pantry_status.sql     — inspiration status, pantry status
+supabase/migrations/012_rd_briefs.sql             — R&D briefs table (intelligence layer)
+supabase/migrations/013_rd_concepts.sql           — R&D concepts table (primary IP artifact)
+supabase/migrations/014_rd_recipes.sql            — R&D recipes table (prototype execution layer)
 ```
 
 ## 3. Configure environment variables

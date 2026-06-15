@@ -184,16 +184,72 @@ Note: Texture deteriorates if held too long. One of the pantry's most versatile 
 
 ## EXISTING MENU CONTEXT
 
-The active menu has dishes across these categories: Dips, Sides, Veggies, Pockets, Large Plates, Dessert, Drinks, and Base Recipes. When generating a concept, consider:
+Use this data to avoid duplication, identify gaps, and calibrate where a new concept should sit on the FF/FD matrix.
 
-- **Dips** (2 active): Hummus, Muhammara Base — primarily Savory, high FF, low FD
-- **Sides** (several): Pita Bread, Arabic Rice, Vermicelli Rice, Fries, Lamb Arayes — high FF, low-to-mid FD, Margin/Revenue Drivers
-- **Veggies** (several): Roasted Eggplant, Caramelised Carrots, Cauliflower, Watermelon Salad — mid FF (3–4), mid-high FD (3–4)
-- **Large Plates** (several): Whole Chicken, Lamb Chops, Tenderloin — Savory/Umami primary, FF 3–5, FD 2–4, premium positioning
+**Format:** Name | Primary Flavor, Secondary Flavors | FF, FD | Strategic Role(s) | Pantry Used
 
-The menu skews Savory and Rich in its current flavour profile. Bright, Briny, and Creamy are underrepresented. The Veggies category has the most room for creative development. The menu is well stocked with lamb and chicken concepts; Fish and Vegetarian concepts are underrepresented.
+### Dips
+- Salted Olive Hummus | Savory, Briny/Rich | FF5, FD3 | Brand Driver
+- Lamb Hummus | Savory, Tangy/Rich | FF4, FD3 | Revenue Driver
+- Muhammara | Smoky, Sweet/Rich | FF3, FD4 | Brand Driver
+- Hummus Mushroom | Savory, Earthy/Rich | FF4, FD3 | Brand Driver | Nduja Sauce
 
-When the brief targets an existing category, check: does this concept introduce something genuinely different from what already exists?
+### Sides
+- House Made Pita Bread | Savory, Rich | FF5, FD1 | Margin Driver
+- Lamb Arayes | Savory, Smoky/Herbaceous | FF4, FD2 | Revenue Driver | Herb Yoghurt
+- Fried Feta Roll | Rich, Sweet/Savory | FF4, FD3 | Brand Driver | Hot Honey
+- Cod Patties | Savory, Tangy/Fresh | FF3, FD4 | Brand Driver | Amba Sauce
+- Vermicelli Rice | Savory, Rich | FF5, FD1 | Margin Driver
+- Sous Vide Potato Fries | Savory, Rich/Spicy | FF5, FD1 | Revenue Driver
+
+### Veggies
+- Burghul Salad | Fresh, Tangy/Herbaceous | FF4, FD2 | Margin Driver
+- Caramelized Carrots | Sweet, Tangy/Spicy/Rich | FF3, FD4 | Brand Driver | Tzatziki, Nduja Sauce
+- Watermelon Salad | Fresh, Sweet/Tangy | FF3, FD4 | Brand Driver | Labneh, Watermelon Dressing
+
+### Large Plates
+- Roast Chicken | Savory, Tangy/Smoky | FF5, FD2 | Revenue Driver | Habanero Sauce, Green Sauce
+- Grilled Lamb Chops | Savory, Herbaceous/Rich | FF4, FD2 | Revenue Driver | Herb Yoghurt
+- Grilled Steak Cube | Savory, Smoky/Fresh | FF5, FD2 | Revenue Driver | Chimichurri
+- Grilled Beef Cheek | Rich, Tangy/Savory | FF4, FD3 | Brand Driver | Labneh, Tzatziki
+- Seared Gindara | Rich, Tangy/Savory | FF3, FD4 | Brand Driver
+- Tarator Salmon | Rich, Tangy/Fresh | FF3, FD4 | Brand Driver | Labneh
+- Roasted Eggplant | Rich, Smoky/Sweet/Tangy | FF3, FD4 | Brand Driver | Hot Honey
+
+### Dessert
+- Pistachio Crème Brûlée | Sweet, Rich/Nutty | FF4, FD2 | Revenue Driver
+- Kunafa Cheese Bake | Sweet, Rich/Tangy | FF3, FD4 | Brand Driver
+
+### Pockets
+*(empty — no active dishes in this category)*
+
+### Drinks
+*(not represented in intelligence system)*
+
+---
+
+### Kitchen Base Recipes (building blocks, not guest-facing dishes)
+These are preparations the kitchen uses as components. Reference these when suggesting what a new concept could be built from — they represent existing kitchen capability and reduce development cost.
+
+Proteins: Merguez, Spiced Lamb Kebabs, Joojeh Kabob, Zaatar Lamb, Moroccan Lamb, Quzi Lamb, Almond Raisin Crusted Quzi, Lamb Kofta, Lamb Arayes, Baharat Beef Mixture, Beef Kofta, Harissa Spiced Beef Kebabs, Beef Shawarma, Beef Chorizo, Braised Beef Cheek, Fish Cake, Sumac Chicken Drumstick
+
+Starches: Home Made Pita Bread, Arabic Rice with Vermicelli, Turmeric Basmati Rice
+
+---
+
+### Key Gaps and Observations (use when assessing a brief)
+
+**Flavor territory gaps:** Briny is almost absent (only Salted Olive Hummus). Creamy is sparse. Bright/citrus-forward dishes are few. The menu skews heavily Savory and Rich.
+
+**Category gaps:** Pockets is completely empty. Veggies has only 3 items and no protein-led vegetarian main. Fish is represented in Large Plates (Gindara, Salmon) but underrepresented in Sides and Veggies.
+
+**FF/FD gaps:** Most dishes cluster at FF3–4/FD2–4. There are very few dishes at FF5/FD4+ (familiar format, high discovery) — the true Salted Olive sweet spot. There's also nothing at FF2/FD5 (high-risk fine dining territory — likely intentional).
+
+**Strategic role gaps:** Margin Drivers are very few. Brand Drivers dominate. VIP Drivers are absent from the main menu (they exist in Base Recipes as premium preparations like Quzi and Almond Raisin Crusted Quzi).
+
+**Pantry utilization:** Hot Honey appears on 2 dishes. Chimichurri on 1. Tapenade, Muhammara, Habanero Sauce, Green Sauce, Shawarma Spice Blend, Spicy Za'atar, Dukkah, Sumac Onion are not yet on any main menu dish — high-leverage assets waiting to be deployed.
+
+When generating a concept, explicitly state which gap the concept addresses.
 
 ---
 

@@ -23,13 +23,21 @@ export default async function EditBriefPage({ params }: { params: Promise<{ id: 
 
       <PageHeader
         eyebrow="Edit Brief"
-        title={brief.category ?? 'Untitled Brief'}
+        title={
+          brief.brief_type === 'menu_collection'
+            ? (brief.menu_theme ?? 'Menu Collection')
+            : (brief.category ?? 'Untitled Brief')
+        }
       />
 
       <BriefForm
         briefId={id}
         initialValues={{
+          brief_type: brief.brief_type ?? 'dish',
           category: brief.category ?? '',
+          menu_theme: brief.menu_theme ?? '',
+          menu_composition: (brief.menu_composition as Record<string, number>) ?? {},
+          ai_recommend_composition: brief.ai_recommend_composition ?? false,
           strategic_roles: brief.strategic_roles ?? [],
           format_familiarity: brief.format_familiarity ?? null,
           flavor_discovery: brief.flavor_discovery ?? null,

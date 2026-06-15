@@ -9,7 +9,8 @@ import { ScoreSlider } from '@/components/forms/score-slider'
 import { Field } from '@/components/forms/field'
 import { PillSelect } from '@/components/forms/pill-select'
 import { SectionLabel } from '@/components/ui/section-label'
-import { textareaCls, primaryBtnCls } from '@/lib/styles'
+import { textareaCls, primaryBtnCls, inputCls } from '@/lib/styles'
+import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
 interface Props {
@@ -21,7 +22,11 @@ interface Props {
 }
 
 type FormData = {
+  brief_type: 'dish' | 'menu_collection'
   category: string
+  menu_theme: string
+  menu_composition: Record<string, number>
+  ai_recommend_composition: boolean
   strategic_roles: string[]
   format_familiarity: number | null
   flavor_discovery: number | null
@@ -70,7 +75,11 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
   const [saving, setSaving] = useState(false)
 
   const [form, setForm] = useState<FormData>({
+    brief_type: initialValues?.brief_type ?? 'dish',
     category: initialValues?.category ?? '',
+    menu_theme: initialValues?.menu_theme ?? '',
+    menu_composition: (initialValues?.menu_composition as Record<string, number>) ?? {},
+    ai_recommend_composition: initialValues?.ai_recommend_composition ?? false,
     strategic_roles: initialValues?.strategic_roles ?? [],
     format_familiarity: initialValues?.format_familiarity ?? null,
     flavor_discovery: initialValues?.flavor_discovery ?? null,
@@ -84,6 +93,16 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
   const set = <K extends keyof FormData>(key: K, value: FormData[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }))
 
+  const adjustComposition = (cat: string, delta: number) => {
+    setForm((prev) => ({
+      ...prev,
+      menu_composition: {
+        ...prev.menu_composition,
+        [cat]: Math.max(0, (prev.menu_composition[cat] ?? 0) + delta),
+      },
+    }))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.opportunity.trim()) {
@@ -92,8 +111,14 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
     }
     setSaving(true)
 
+    const isMenu = form.brief_type === 'menu_collection'
+
     const payload = {
-      category: form.category || null,
+      brief_type: form.brief_type,
+      category: !isMenu ? (form.category || null) : null,
+      menu_theme: isMenu ? (form.menu_theme || null) : null,
+      menu_composition: isMenu && !form.ai_recommend_composition ? form.menu_composition : null,
+      ai_recommend_composition: isMenu ? form.ai_recommend_composition : false,
       strategic_roles: form.strategic_roles,
       format_familiarity: form.format_familiarity,
       flavor_discovery: form.flavor_discovery,
@@ -132,13 +157,50 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
       <div className="space-y-5">
         <SectionLabel label="Context" className="mb-6" />
 
-        <Field label="Category">
-          <PillSelect
-            options={categoryOptions}
-            value={form.category}
-            onChange={(v) => set('category', v)}
-          />
+        {/* Brief type toggle */}
+        <Field label="What are we creating?">
+          <div className="flex gap-1.5">
+            {(['dish', 'menu_collection'] as const).map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => set('brief_type', type)}
+                className={cn(
+                  'text-[12px] px-2.5 py-1 rounded-full border transition-colors',
+                  form.brief_type === type
+                    ? 'bg-olive text-cream border-olive'
+                    : 'bg-white text-ink-mid border-olive/20 hover:border-olive/50'
+                )}
+              >
+                {type === 'dish' ? 'Single Dish' : 'Menu Collection'}
+              </button>
+            ))}
+          </div>
         </Field>
+
+        {/* Category — dish only */}
+        {form.brief_type === 'dish' && (
+          <Field label="Category">
+            <PillSelect
+              options={categoryOptions}
+              value={form.category}
+              onChange={(v) => set('category', v)}
+            />
+          </Field>
+        )}
+
+        {/* Theme — menu_collection only */}
+        {form.brief_type === 'menu_collection' && (
+          <Field label="Theme" helper="What holds this menu together?">
+            <input
+              type="text"
+              value={form.menu_theme}
+              onChange={(e) => set('menu_theme', e.target.value)}
+              placeholder="e.g. Summer solstice dinner party, Levantine collaboration menu…"
+              className={inputCls}
+            />
+          </Field>
+        )}
 
         <Field label="Strategic Role">
           <MultiSelect
@@ -152,14 +214,22 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
         <div className="grid grid-cols-2 gap-5">
           <ScoreSlider
             label="Format Familiarity"
-            description="How recognisable should the format feel?"
+            description={
+              form.brief_type === 'menu_collection'
+                ? 'How familiar should the overall menu format feel?'
+                : 'How recognisable should the format feel?'
+            }
             value={form.format_familiarity}
             onChange={(v) => set('format_familiarity', v)}
             max={5}
           />
           <ScoreSlider
             label="Flavor Discovery"
-            description="How adventurous should the flavor profile be?"
+            description={
+              form.brief_type === 'menu_collection'
+                ? "How adventurous should the menu's flavor profile be?"
+                : 'How adventurous should the flavor profile be?'
+            }
             value={form.flavor_discovery}
             onChange={(v) => set('flavor_discovery', v)}
             max={5}
@@ -174,6 +244,53 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
             placeholder="No pantry asset specified"
           />
         </Field>
+
+        {/* Composition — menu_collection only */}
+        {form.brief_type === 'menu_collection' && (
+          <Field label="Composition" helper="How many dishes per category?">
+            <div className="mb-3 flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="ai_recommend_composition"
+                checked={form.ai_recommend_composition}
+                onChange={(e) => set('ai_recommend_composition', e.target.checked)}
+                className="accent-olive"
+              />
+              <label htmlFor="ai_recommend_composition" className="text-[12px] text-ink-mid cursor-pointer select-none">
+                Let AI recommend composition
+              </label>
+            </div>
+
+            {!form.ai_recommend_composition && (
+              <div className="bg-white border border-olive/15 rounded-lg divide-y divide-olive/10">
+                {categoryOptions.map((cat) => (
+                  <div key={cat} className="flex items-center justify-between px-4 py-2.5">
+                    <span className="text-sm text-ink font-light">{cat}</span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => adjustComposition(cat, -1)}
+                        className="w-6 h-6 flex items-center justify-center text-ink-muted hover:text-ink rounded transition-colors text-base leading-none"
+                      >
+                        −
+                      </button>
+                      <span className="text-sm font-medium text-ink w-5 text-center tabular-nums">
+                        {form.menu_composition[cat] ?? 0}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => adjustComposition(cat, 1)}
+                        className="w-6 h-6 flex items-center justify-center text-ink-muted hover:text-ink rounded transition-colors text-base leading-none"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Field>
+        )}
       </div>
 
       {/* ── The Brief ── */}
@@ -182,7 +299,11 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
 
         <FreeTextField
           question="What opportunity are we trying to capture?"
-          purpose="Explain why this concept should exist on the menu."
+          purpose={
+            form.brief_type === 'menu_collection'
+              ? 'Explain why this menu should exist and what it aims to achieve.'
+              : 'Explain why this concept should exist on the menu.'
+          }
           placeholder="e.g. Guests want something light and shareable for midday dining. We don't have a strong option in the Veggies section that feels exciting under $20. This concept should fill that gap without competing with our hummus line…"
           value={form.opportunity}
           onChange={(v) => set('opportunity', v)}

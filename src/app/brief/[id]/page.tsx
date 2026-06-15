@@ -42,8 +42,12 @@ export default async function BriefDetailPage({ params }: { params: Promise<{ id
       <BackLink href="/brief/history" label="Brief History" />
 
       <PageHeader
-        eyebrow="R&D Brief"
-        title={brief.category ?? 'Untitled Brief'}
+        eyebrow={brief.brief_type === 'menu_collection' ? 'R&D Brief · Menu Collection' : 'R&D Brief'}
+        title={
+          brief.brief_type === 'menu_collection'
+            ? (brief.menu_theme ?? 'Menu Collection')
+            : (brief.category ?? 'Untitled Brief')
+        }
         subtitle={dateStr}
         actions={
           <>
@@ -58,21 +62,50 @@ export default async function BriefDetailPage({ params }: { params: Promise<{ id
       {/* ── The Brief ── */}
       <SectionCard className="space-y-5 mb-8">
 
-        {(brief.category || brief.strategic_roles?.length > 0) && (
-          <div className="flex flex-wrap gap-2">
-            {brief.category && (
-              <Pill variant="olive">{brief.category}</Pill>
+        <div className="flex flex-wrap gap-2">
+          {brief.brief_type === 'menu_collection' ? (
+            <Pill variant="olive">Menu Collection</Pill>
+          ) : brief.category ? (
+            <Pill variant="olive">{brief.category}</Pill>
+          ) : null}
+          {brief.strategic_roles?.map((r: string) => (
+            <Pill key={r} variant="default">{r}</Pill>
+          ))}
+          {brief.format_familiarity != null && (
+            <Pill variant="cream">FF {brief.format_familiarity}</Pill>
+          )}
+          {brief.flavor_discovery != null && (
+            <Pill variant="cream">FD {brief.flavor_discovery}</Pill>
+          )}
+        </div>
+
+        {/* Menu theme */}
+        {brief.brief_type === 'menu_collection' && brief.menu_theme && (
+          <BriefField label="Theme">
+            <p>{brief.menu_theme}</p>
+          </BriefField>
+        )}
+
+        {/* Menu composition */}
+        {brief.brief_type === 'menu_collection' && (
+          <BriefField label="Composition">
+            {brief.ai_recommend_composition ? (
+              <p className="text-ink-muted italic text-sm">AI will recommend composition</p>
+            ) : brief.menu_composition ? (
+              <div className="flex flex-wrap gap-x-5 gap-y-1.5 mt-0.5">
+                {Object.entries(brief.menu_composition as Record<string, number>)
+                  .filter(([, count]) => count > 0)
+                  .map(([cat, count]) => (
+                    <span key={cat} className="text-sm">
+                      <span className="text-ink-muted">{cat}</span>
+                      <span className="text-ink font-medium ml-1.5 tabular-nums">{count}</span>
+                    </span>
+                  ))}
+              </div>
+            ) : (
+              <p className="text-ink-muted italic text-sm">No composition specified</p>
             )}
-            {brief.strategic_roles?.map((r: string) => (
-              <Pill key={r} variant="default">{r}</Pill>
-            ))}
-            {brief.format_familiarity != null && (
-              <Pill variant="cream">FF {brief.format_familiarity}</Pill>
-            )}
-            {brief.flavor_discovery != null && (
-              <Pill variant="cream">FD {brief.flavor_discovery}</Pill>
-            )}
-          </div>
+          </BriefField>
         )}
 
         {brief.pantry_assets?.length > 0 && (

@@ -10,7 +10,7 @@ const LEVEL_ORDER = [
 ]
 
 const LEVEL_SUBTITLES: Record<string, string> = {
-  'Level 1: Dish Principles': 'Every dish must fulfil these principles. These are the non-negotiables.',
+  'Level 1: Dish Principles': 'Every Dish Must Fulfil These Principles. These are the non-negotiables.',
   'Level 2: Menu Principles': 'Not every dish needs to fulfil these. The menu collectively should.',
   'Level 3: Pantry Strategy': 'Long-term innovation direction for pantry product development.',
 }

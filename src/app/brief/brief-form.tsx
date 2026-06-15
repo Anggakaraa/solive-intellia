@@ -265,7 +265,7 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
               <div className="bg-white border border-olive/15 rounded-lg divide-y divide-olive/10">
                 {categoryOptions.map((cat) => (
                   <div key={cat} className="flex items-center justify-between px-4 py-2.5">
-                    <span className="text-sm text-ink font-light">{cat}</span>
+                    <span className="text-[11px] text-ink-mid">{cat}</span>
                     <div className="flex items-center gap-3">
                       <button
                         type="button"

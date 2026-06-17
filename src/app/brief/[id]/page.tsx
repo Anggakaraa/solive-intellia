@@ -1,11 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronRight } from 'lucide-react'
 import { BackLink } from '@/components/ui/back-link'
 import { PageHeader } from '@/components/ui/page-header'
 import { Pill } from '@/components/ui/pill'
-import { StatusBadge } from '@/components/ui/status-badge'
 import { SectionCard } from '@/components/ui/section-card'
 import { DeleteButton } from '@/components/ui/delete-button'
 import { mutedBtnCls } from '@/lib/styles'
@@ -153,33 +151,31 @@ export default async function BriefDetailPage({ params }: { params: Promise<{ id
         </div>
 
         {concepts && concepts.length > 0 ? (
-          <div className="space-y-2">
-            {concepts.map((concept) => (
+          <div>
+            <div className="bg-white border border-olive/15 rounded-lg px-5 py-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-ink">
+                  {concepts.length} concept{concepts.length !== 1 ? 's' : ''} generated
+                </p>
+                <p className="text-[12px] text-ink-muted font-light mt-0.5">
+                  Last updated {new Date(concepts[concepts.length - 1].created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}
+                </p>
+              </div>
               <Link
-                key={concept.id}
-                href={`/concepts/${concept.id}`}
-                className="group flex items-start justify-between gap-4 bg-white border border-olive/15 rounded-lg px-5 py-4 hover:border-olive/40 transition-colors"
+                href={`/brief/${id}/output`}
+                className="text-[12px] text-olive font-medium hover:underline shrink-0"
               >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-sm font-medium text-ink truncate">{concept.concept_name}</p>
-                    <StatusBadge status={concept.status} />
-                  </div>
-                  {concept.one_line && (
-                    <p className="text-[12px] text-ink-muted font-light truncate">{concept.one_line}</p>
-                  )}
-                </div>
-                <ChevronRight size={15} className="text-ink-muted shrink-0 mt-1 group-hover:text-olive transition-colors" />
+                View AI Output →
               </Link>
-            ))}
-            <div className="pt-2">
-              <GenerateConceptButton briefId={id} label="Generate another concept" variant="ghost" />
+            </div>
+            <div className="pt-3">
+              <GenerateConceptButton briefId={id} briefType={brief.brief_type ?? 'dish'} label="Regenerate" variant="ghost" />
             </div>
           </div>
         ) : (
           <div className="border border-dashed border-olive/25 rounded-lg px-5 py-8 text-center">
             <p className="text-sm text-ink-muted font-light mb-4">No concepts generated yet.</p>
-            <GenerateConceptButton briefId={id} label="Generate Concept" variant="primary" />
+            <GenerateConceptButton briefId={id} briefType={brief.brief_type ?? 'dish'} label="Generate Concept" variant="primary" />
           </div>
         )}
       </div>

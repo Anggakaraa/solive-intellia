@@ -3,11 +3,13 @@ interface SectionCardProps {
   helper?: string
   children: React.ReactNode
   className?: string
+  variant?: 'default' | 'muted'
 }
 
-export function SectionCard({ label, helper, children, className = '' }: SectionCardProps) {
+export function SectionCard({ label, helper, children, className = '', variant = 'default' }: SectionCardProps) {
+  const bg = variant === 'muted' ? 'bg-cream-dark' : 'bg-white'
   return (
-    <div className={`bg-white border border-olive/15 rounded-lg p-5 ${className}`}>
+    <div className={`${bg} border border-olive/15 rounded-lg p-5 ${className}`}>
       {label && (
         <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-3">{label}</p>
       )}

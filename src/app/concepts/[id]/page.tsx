@@ -98,7 +98,23 @@ export default async function ConceptDetailPage({ params }: { params: Promise<{ 
         {/* Why it could win */}
         {concept.why_it_could_win && (
           <SectionCard label="Why It Could Win">
-            <p className="text-sm text-ink font-light leading-relaxed">{concept.why_it_could_win}</p>
+            {typeof concept.why_it_could_win === 'object' ? (
+              <div className="space-y-3">
+                {(['menu_gap', 'emotional_trigger', 'salted_olive'] as const).map((key) => {
+                  const win = concept.why_it_could_win as Record<string, string>
+                  return win[key] ? (
+                    <div key={key}>
+                      <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-1">
+                        {key === 'menu_gap' ? 'Menu Gap' : key === 'emotional_trigger' ? 'Emotional Trigger' : 'Salted Olive'}
+                      </p>
+                      <p className="text-sm text-ink font-light leading-relaxed">{win[key]}</p>
+                    </div>
+                  ) : null
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-ink font-light leading-relaxed">{concept.why_it_could_win as string}</p>
+            )}
           </SectionCard>
         )}
 

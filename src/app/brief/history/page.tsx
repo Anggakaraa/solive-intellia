@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { ChevronRight, Sparkles } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { PageHeader } from '@/components/ui/page-header'
 import { Pill } from '@/components/ui/pill'
 import { ghostBtnCls } from '@/lib/styles'
@@ -10,7 +10,7 @@ export default async function BriefHistoryPage() {
 
   const { data: briefs } = await supabase
     .from('rd_briefs')
-    .select('id, created_at, category, strategic_roles, opportunity')
+    .select('id, created_at, brief_type, category, menu_theme, strategic_roles, opportunity')
     .order('created_at', { ascending: false })
 
   return (
@@ -41,9 +41,11 @@ export default async function BriefHistoryPage() {
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1.5">
-                  {brief.category && (
+                  {brief.brief_type === 'menu_collection' ? (
+                    <Pill variant="olive">{brief.menu_theme ?? 'Menu Collection'}</Pill>
+                  ) : brief.category ? (
                     <Pill variant="olive">{brief.category}</Pill>
-                  )}
+                  ) : null}
                   {brief.strategic_roles?.map((r: string) => (
                     <Pill key={r} variant="default">{r}</Pill>
                   ))}
@@ -60,10 +62,6 @@ export default async function BriefHistoryPage() {
                     {brief.opportunity}
                   </p>
                 )}
-                <div className="flex items-center gap-1 mt-2 text-[11px] text-ink-muted">
-                  <Sparkles size={10} />
-                  <span>Mock result available</span>
-                </div>
               </div>
               <ChevronRight size={15} className="text-ink-muted shrink-0 mt-1 group-hover:text-olive transition-colors" />
             </Link>

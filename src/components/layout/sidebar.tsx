@@ -13,6 +13,9 @@ import {
   Download,
   Lightbulb,
   Clock,
+  Bookmark,
+  FolderOpen,
+  Palette,
 } from 'lucide-react'
 
 const sections = [
@@ -36,12 +39,15 @@ const sections = [
     items: [
       { href: '/brief', label: 'R&D Brief', icon: Lightbulb },
       { href: '/brief/history', label: 'Brief History', icon: Clock },
+      { href: '/saved/items', label: 'Saved Items', icon: Bookmark },
+      { href: '/saved/collections', label: 'Saved Collections', icon: FolderOpen },
     ],
   },
   {
     label: 'Tools',
     items: [
       { href: '/export', label: 'Export', icon: Download },
+      { href: '/tools/components', label: 'Component Library', icon: Palette },
     ],
   },
 ]
@@ -56,8 +62,8 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="w-[220px] shrink-0 bg-olive flex flex-col min-h-screen">
-      <div className="px-6 py-7 border-b border-white/10">
+    <aside className="w-[220px] shrink-0 bg-olive flex flex-col h-full">
+      <div className="px-6 py-7 border-b border-white/10 shrink-0">
         <Link href="/">
           <Image
             src="/logo.png"
@@ -73,7 +79,7 @@ export function Sidebar() {
         </Link>
       </div>
 
-      <nav className="flex-1 py-3">
+      <nav className="flex-1 py-3 overflow-y-auto">
         {sections.map(({ label, items }) => (
           <div key={label} className="mt-4">
             <p className="text-[9px] uppercase tracking-[1.8px] text-cream/40 px-6 mb-1.5">

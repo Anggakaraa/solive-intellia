@@ -88,7 +88,11 @@ export type MenuItem = {
 
 export type RdBrief = {
   id: string
+  brief_type: 'dish' | 'menu_collection'
   category: string | null
+  menu_theme: string | null
+  menu_composition: Record<string, number> | null
+  ai_recommend_composition: boolean
   strategic_roles: string[]
   format_familiarity: number | null
   flavor_discovery: number | null
@@ -97,6 +101,40 @@ export type RdBrief = {
   creative_references: string | null
   desired_feeling: string | null
   constraints: string | null
+  exploration_mode: 'safe' | 'balanced' | 'exploratory'
+  generation_mode: 'full' | 'fast'
+  output_data: {
+    narrative?: string
+    recommendation?: string
+    collection_name?: string
+  } | null
+  created_at: string
+  updated_at: string
+}
+
+export type RdConcept = {
+  id: string
+  brief_id: string
+  concept_name: string
+  one_line: string | null
+  breakdown: {
+    hero: string
+    flavor_drivers: string[]
+    textures: string[]
+    key_contrast: string
+  } | null
+  presentation: string | null
+  why_it_could_win: {
+    menu_gap: string
+    emotional_trigger: string
+    salted_olive: string
+  } | null
+  feasibility: {
+    assets_leveraged: string[]
+    watchouts: string[]
+  } | null
+  experiment_focus: string[]
+  status: 'generated' | 'saved' | 'testing' | 'active' | 'archived'
   created_at: string
   updated_at: string
 }

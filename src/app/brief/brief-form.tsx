@@ -35,6 +35,8 @@ type FormData = {
   creative_references: string
   desired_feeling: string
   constraints: string
+  exploration_mode: 'safe' | 'balanced' | 'exploratory'
+  generation_mode: 'full' | 'fast'
 }
 
 
@@ -88,6 +90,8 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
     creative_references: initialValues?.creative_references ?? '',
     desired_feeling: initialValues?.desired_feeling ?? '',
     constraints: initialValues?.constraints ?? '',
+    exploration_mode: (initialValues?.exploration_mode as FormData['exploration_mode']) ?? 'balanced',
+    generation_mode: (initialValues?.generation_mode as FormData['generation_mode']) ?? 'full',
   })
 
   const set = <K extends keyof FormData>(key: K, value: FormData[K]) =>
@@ -127,6 +131,8 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
       creative_references: form.creative_references || null,
       desired_feeling: form.desired_feeling || null,
       constraints: form.constraints || null,
+      exploration_mode: form.exploration_mode,
+      generation_mode: form.generation_mode,
     }
 
     if (briefId) {
@@ -243,6 +249,63 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
             onChange={(v) => set('pantry_assets', v)}
             placeholder="No pantry asset specified"
           />
+        </Field>
+
+        {/* Exploration Mode */}
+        <Field label="Exploration Mode" helper="Controls how closely the AI adheres to existing menu and pantry constraints.">
+          <div className="space-y-2 mt-1">
+            {([
+              { value: 'safe', label: 'Safe', description: 'Strong adherence to existing menu. Prioritises pantry assets, Base Recipes, and operational feasibility. Best for immediate deployment.' },
+              { value: 'balanced', label: 'Balanced', description: 'Pantry-led when useful. Can stretch current territory and introduce new combinations. Default for most briefs.' },
+              { value: 'exploratory', label: 'Exploratory', description: 'Dish Principles still apply. Pantry-led is optional. Can challenge menu assumptions and propose future assets. Focus on breakthrough thinking.' },
+            ] as const).map(({ value, label, description }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => set('exploration_mode', value)}
+                className={cn(
+                  'w-full text-left px-3.5 py-3 rounded-lg border transition-colors',
+                  form.exploration_mode === value
+                    ? 'bg-olive-faint border-olive/40'
+                    : 'bg-white border-olive/15 hover:border-olive/35'
+                )}
+              >
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className={cn('text-[12px] font-medium', form.exploration_mode === value ? 'text-olive' : 'text-ink')}>{label}</span>
+                  {value === 'balanced' && <span className="text-[9px] uppercase tracking-[1px] text-ink-muted">Default</span>}
+                </div>
+                <p className="text-[11px] text-ink-muted font-light leading-snug">{description}</p>
+              </button>
+            ))}
+          </div>
+        </Field>
+
+        {/* Generation Mode */}
+        <Field label="Generation Mode" helper="Controls output depth. Fast is useful for rapid ideation.">
+          <div className="flex gap-2 mt-1">
+            {([
+              { value: 'full', label: 'Full', description: 'Complete concept with breakdown, presentation, feasibility, and experiment focus.' },
+              { value: 'fast', label: 'Fast', description: 'Name, one-liner, why it could win, and experiment focus only. Lower token cost.' },
+            ] as const).map(({ value, label, description }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => set('generation_mode', value)}
+                className={cn(
+                  'flex-1 text-left px-3.5 py-3 rounded-lg border transition-colors',
+                  form.generation_mode === value
+                    ? 'bg-olive-faint border-olive/40'
+                    : 'bg-white border-olive/15 hover:border-olive/35'
+                )}
+              >
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className={cn('text-[12px] font-medium', form.generation_mode === value ? 'text-olive' : 'text-ink')}>{label}</span>
+                  {value === 'full' && <span className="text-[9px] uppercase tracking-[1px] text-ink-muted">Default</span>}
+                </div>
+                <p className="text-[11px] text-ink-muted font-light leading-snug">{description}</p>
+              </button>
+            ))}
+          </div>
         </Field>
 
         {/* Composition — menu_collection only */}

@@ -223,9 +223,21 @@ Menu Collection generation happens in two layers. The tool available tells you w
 **Layer 1 — Collection Overview** (tool: save_collection_overview)
 Design the collection as a whole. Do NOT generate full concept details.
 
+Before writing any dish slot, answer this question from the brief:
+
+**What kind of food belongs at this specific occasion — and what kind doesn't?**
+
+Derive your answer from the brief's occasion, tone, desired feeling, and guest context. Be specific about dish types and formats, not just adjectives.
+
+Write two things:
+1. The dish types and formats that belong here — what would feel right at this specific table, for this specific guest, on this specific night.
+2. The dish types and formats that don't belong — what would feel wrong or out of place, even if they are otherwise good Salted Olive dishes.
+
+Then generate all dish slots from (1) only. Any slot that contradicts (2) should be replaced before outputting. Do not default to the standard Salted Olive dish pool. The brief defines the pool for this collection.
+
 1. **Tensions** — Name and resolve brief conflicts before proceeding. Be direct: if FF3/FD5 is hard, say so and state how you'll interpret it.
 2. **Collection Name** — Short evocative working title. Not a marketing tagline.
-3. **Narrative** — What unifies this menu? What emotional territory? Why does it exist? What should guests feel? (3–5 paragraphs)
+3. **Narrative** — What unifies this menu? What emotional territory? Why does it exist? What should guests feel? (2 paragraphs max)
 4. **Wave Structure** — Set / tasting menu only. Design the progression arc (typically 3–4 waves). Each wave: number, evocative feel label, categories, dish count.
 5. **Dish Slots** — One per requested dish. For each: category, working concept name, one-liner. For set menus, include wave and wave_order.
 

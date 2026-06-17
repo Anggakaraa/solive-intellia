@@ -65,7 +65,7 @@ function FreeTextField({
         onChange={(e) => onChange(e.target.value)}
         rows={rows}
         placeholder={placeholder}
-        className={textareaCls}
+        className={cn(textareaCls, 'text-[12px] italic')}
       />
     </div>
   )
@@ -111,18 +111,22 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const isMenu = form.brief_type === 'menu_collection'
+
+    if (!form.menu_theme.trim()) {
+      toast.error(isMenu ? 'Add a theme before generating' : 'Add a working title before generating')
+      return
+    }
     if (!form.opportunity.trim()) {
-      toast.error('Describe the opportunity before capturing the brief')
+      toast.error('Describe the opportunity before generating')
       return
     }
     setSaving(true)
 
-    const isMenu = form.brief_type === 'menu_collection'
-
     const payload = {
       brief_type: form.brief_type,
       category: !isMenu ? (form.category || null) : null,
-      menu_theme: isMenu ? (form.menu_theme || null) : null,
+      menu_theme: form.menu_theme || null,
       menu_composition: isMenu && !form.ai_recommend_composition ? form.menu_composition : null,
       ai_recommend_composition: isMenu ? form.ai_recommend_composition : false,
       strategic_roles: form.strategic_roles,
@@ -139,6 +143,7 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
     }
 
     if (briefId) {
+      // Edit mode — just save
       const { error } = await supabase.from('rd_briefs').update(payload).eq('id', briefId)
       if (error) {
         toast.error(error.message)
@@ -148,14 +153,29 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
       toast.success('Brief updated')
       router.push(`/brief/${briefId}`)
     } else {
+      // New brief — save then generate immediately
       const { data, error } = await supabase.from('rd_briefs').insert(payload).select().single()
       if (error || !data) {
         toast.error(error?.message ?? 'Failed to save brief')
         setSaving(false)
         return
       }
-      toast.success('Brief captured')
-      router.push(`/brief/${data.id}`)
+
+      const endpoint = isMenu ? '/api/generate-collection' : '/api/generate-concepts'
+      const genRes = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ briefId: data.id }),
+      })
+
+      if (!genRes.ok) {
+        const genData = await genRes.json()
+        toast.error(genData.error ?? 'Generation failed')
+        router.push(`/brief/${data.id}`)
+        return
+      }
+
+      router.push(`/brief/${data.id}/output`)
     }
   }
 
@@ -187,15 +207,26 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
           </div>
         </Field>
 
-        {/* Category — dish only */}
+        {/* Title + Category — dish only */}
         {form.brief_type === 'dish' && (
-          <Field label="Category">
-            <PillSelect
-              options={categoryOptions}
-              value={form.category}
-              onChange={(v) => set('category', v)}
-            />
-          </Field>
+          <>
+            <Field label="Working Title">
+              <input
+                type="text"
+                value={form.menu_theme}
+                onChange={(e) => set('menu_theme', e.target.value)}
+                placeholder="e.g. Lamb pocket with amba, Signature hummus upgrade…"
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Category">
+              <PillSelect
+                options={categoryOptions}
+                value={form.category}
+                onChange={(v) => set('category', v)}
+              />
+            </Field>
+          </>
         )}
 
         {/* Theme + Format — menu_collection only */}
@@ -281,29 +312,21 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
         </Field>
 
         {/* Exploration Mode */}
-        <Field label="Exploration Mode" helper="Controls how closely the AI adheres to existing menu and pantry constraints.">
-          <div className="space-y-2 mt-1">
-            {([
-              { value: 'safe', label: 'Safe', description: 'Strong adherence to existing menu. Prioritises pantry assets, Base Recipes, and operational feasibility. Best for immediate deployment.' },
-              { value: 'balanced', label: 'Balanced', description: 'Pantry-led when useful. Can stretch current territory and introduce new combinations. Default for most briefs.' },
-              { value: 'exploratory', label: 'Exploratory', description: 'Dish Principles still apply. Pantry-led is optional. Can challenge menu assumptions and propose future assets. Focus on breakthrough thinking.' },
-            ] as const).map(({ value, label, description }) => (
+        <Field label="Exploration Mode">
+          <div className="flex gap-1.5">
+            {(['safe', 'balanced', 'exploratory'] as const).map((value) => (
               <button
                 key={value}
                 type="button"
                 onClick={() => set('exploration_mode', value)}
                 className={cn(
-                  'w-full text-left px-3.5 py-3 rounded-lg border transition-colors',
+                  'text-[12px] px-3 py-1.5 rounded-full border transition-colors capitalize',
                   form.exploration_mode === value
-                    ? 'bg-olive-faint border-olive/40'
-                    : 'bg-white border-olive/15 hover:border-olive/35'
+                    ? 'bg-olive text-cream border-olive'
+                    : 'bg-white text-ink-mid border-olive/20 hover:border-olive/50'
                 )}
               >
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className={cn('text-[12px] font-medium', form.exploration_mode === value ? 'text-olive' : 'text-ink')}>{label}</span>
-                  {value === 'balanced' && <span className="text-[9px] uppercase tracking-[1px] text-ink-muted">Default</span>}
-                </div>
-                <p className="text-[11px] text-ink-muted font-light leading-snug">{description}</p>
+                {value === 'exploratory' ? 'Explore' : value.charAt(0).toUpperCase() + value.slice(1)}
               </button>
             ))}
           </div>
@@ -311,28 +334,21 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
 
         {/* Generation Mode — single dish only */}
         {form.brief_type === 'dish' && (
-          <Field label="Generation Mode" helper="Controls output depth. Fast is useful for rapid ideation.">
-            <div className="flex gap-2 mt-1">
-              {([
-                { value: 'full', label: 'Full', description: 'Complete concept with breakdown, presentation, feasibility, and experiment focus.' },
-                { value: 'fast', label: 'Fast', description: 'Name, one-liner, why it could win, and experiment focus only. Lower token cost.' },
-              ] as const).map(({ value, label, description }) => (
+          <Field label="Generation Mode">
+            <div className="flex gap-1.5">
+              {(['full', 'fast'] as const).map((value) => (
                 <button
                   key={value}
                   type="button"
                   onClick={() => set('generation_mode', value)}
                   className={cn(
-                    'flex-1 text-left px-3.5 py-3 rounded-lg border transition-colors',
+                    'text-[12px] px-3 py-1.5 rounded-full border transition-colors',
                     form.generation_mode === value
-                      ? 'bg-olive-faint border-olive/40'
-                      : 'bg-white border-olive/15 hover:border-olive/35'
+                      ? 'bg-olive text-cream border-olive'
+                      : 'bg-white text-ink-mid border-olive/20 hover:border-olive/50'
                   )}
                 >
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className={cn('text-[12px] font-medium', form.generation_mode === value ? 'text-olive' : 'text-ink')}>{label}</span>
-                    {value === 'full' && <span className="text-[9px] uppercase tracking-[1px] text-ink-muted">Default</span>}
-                  </div>
-                  <p className="text-[11px] text-ink-muted font-light leading-snug">{description}</p>
+                  {value.charAt(0).toUpperCase() + value.slice(1)}
                 </button>
               ))}
             </div>
@@ -439,7 +455,13 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
           disabled={saving}
           className={primaryBtnCls}
         >
-          {saving ? 'Saving…' : briefId ? 'Save changes' : 'Capture brief'}
+          {saving
+            ? (briefId ? 'Saving…' : 'Generating…')
+            : briefId
+            ? 'Save changes'
+            : form.brief_type === 'menu_collection'
+            ? 'Generate Collection →'
+            : 'Generate Concept →'}
         </button>
       </div>
 

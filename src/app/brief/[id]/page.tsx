@@ -49,7 +49,7 @@ export default async function BriefDetailPage({ params }: { params: Promise<{ id
         title={
           brief.brief_type === 'menu_collection'
             ? (brief.menu_theme ?? 'Menu Collection')
-            : (brief.category ?? 'Untitled Brief')
+            : (brief.menu_theme ?? brief.category ?? 'Untitled Brief')
         }
         subtitle={dateStr}
         actions={

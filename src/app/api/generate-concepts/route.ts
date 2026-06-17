@@ -83,6 +83,7 @@ function buildBriefMessage(brief: Record<string, unknown>, recentConcepts: strin
       lines.push('Menu Composition: Recommend composition based on the theme and gaps')
     }
   } else {
+    if (brief.menu_theme) lines.push(`Working Title: ${brief.menu_theme}`)
     if (brief.category) lines.push(`Category: ${brief.category}`)
   }
 

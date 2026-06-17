@@ -30,7 +30,7 @@ export default async function BriefOutputPage({ params }: { params: Promise<{ id
 
   const [{ data: brief }, { data: rawConcepts }] = await Promise.all([
     supabase.from('rd_briefs').select('*').eq('id', id).single(),
-    supabase.from('rd_concepts').select('*').eq('brief_id', id).order('created_at'),
+    supabase.from('rd_concepts').select('*').eq('brief_id', id).order('created_at', { ascending: false }),
   ])
 
   if (!brief) notFound()
@@ -43,7 +43,7 @@ export default async function BriefOutputPage({ params }: { params: Promise<{ id
 
   const title = isCollection
     ? (brief.menu_theme ?? 'Menu Collection')
-    : (brief.category ?? 'Untitled Brief')
+    : (brief.menu_theme ?? brief.category ?? 'Untitled Brief')
 
   const eyebrow = isCollection
     ? `R&D Output · ${(brief as { collection_format?: string }).collection_format === 'set_menu' ? 'Set Menu' : 'Menu Collection'}`

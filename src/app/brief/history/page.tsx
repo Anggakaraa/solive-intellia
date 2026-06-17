@@ -43,8 +43,8 @@ export default async function BriefHistoryPage() {
                 <div className="flex items-center gap-2 flex-wrap mb-1.5">
                   {brief.brief_type === 'menu_collection' ? (
                     <Pill variant="olive">{brief.menu_theme ?? 'Menu Collection'}</Pill>
-                  ) : brief.category ? (
-                    <Pill variant="olive">{brief.category}</Pill>
+                  ) : (brief.menu_theme || brief.category) ? (
+                    <Pill variant="olive">{brief.menu_theme ?? brief.category}</Pill>
                   ) : null}
                   {brief.strategic_roles?.map((r: string) => (
                     <Pill key={r} variant="default">{r}</Pill>

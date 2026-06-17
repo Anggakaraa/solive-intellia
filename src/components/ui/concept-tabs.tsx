@@ -24,8 +24,16 @@ export function ConceptTabs({
   onSave,
 }: ConceptTabsProps) {
   const [activeIndex, setActiveIndex] = useState(0)
+  const [localSavedIds, setLocalSavedIds] = useState<Set<string>>(() => new Set(savedIds))
+
+  const handleSave = (id: string) => {
+    setLocalSavedIds((prev) => new Set([...prev, id]))
+    onSave?.(id)
+  }
 
   if (concepts.length === 0) return null
+
+  const activeConcept = concepts[activeIndex]
 
   return (
     <div>
@@ -52,14 +60,15 @@ export function ConceptTabs({
         ))}
       </div>
 
-      {/* Active concept */}
+      {/* Active concept — key forces remount on tab switch so saved state resets correctly */}
       <ConceptCard
-        concept={concepts[activeIndex]}
+        key={activeConcept.id}
+        concept={activeConcept}
         ff={ff}
         fd={fd}
         strategicRoles={strategicRoles}
-        isSaved={savedIds.includes(concepts[activeIndex].id)}
-        onSave={onSave}
+        isSaved={localSavedIds.has(activeConcept.id)}
+        onSave={handleSave}
       />
 
       {/* Recommendation strip */}

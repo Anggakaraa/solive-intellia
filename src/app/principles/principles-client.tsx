@@ -25,16 +25,16 @@ export function PrinciplesClient({ levels }: { levels: Level[] }) {
           <button
             type="button"
             onClick={() => toggle(category)}
-            className="w-full flex items-center justify-between px-5 py-4 hover:bg-olive/[0.03] transition-colors text-left"
+            className="w-full flex items-center justify-between px-5 py-4 bg-olive hover:bg-olive-light transition-colors text-left"
           >
             <div>
-              <p className="font-serif text-base font-normal text-ink">{category}</p>
-              <p className="text-[11px] text-ink-muted mt-0.5">{subtitle}</p>
+              <p className="font-serif text-base font-normal text-cream">{category}</p>
+              <p className="text-[11px] text-cream/60 mt-0.5">{subtitle}</p>
             </div>
             <div className="flex items-center gap-2 shrink-0 ml-4">
-              <span className="text-[11px] text-ink-muted">{items.length} principles</span>
+              <span className="text-[11px] text-cream/60">{items.length} principles</span>
               <ChevronDown
-                className={`text-ink-muted transition-transform ${open[category] ? 'rotate-180' : ''}`}
+                className={`text-cream/60 transition-transform ${open[category] ? 'rotate-180' : ''}`}
                 size={15}
               />
             </div>

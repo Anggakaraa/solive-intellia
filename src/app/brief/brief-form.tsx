@@ -23,6 +23,7 @@ interface Props {
 
 type FormData = {
   brief_type: 'dish' | 'menu_collection'
+  collection_format: 'a_la_carte' | 'set_menu'
   category: string
   menu_theme: string
   menu_composition: Record<string, number>
@@ -78,6 +79,7 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
 
   const [form, setForm] = useState<FormData>({
     brief_type: initialValues?.brief_type ?? 'dish',
+    collection_format: (initialValues?.collection_format as FormData['collection_format']) ?? 'a_la_carte',
     category: initialValues?.category ?? '',
     menu_theme: initialValues?.menu_theme ?? '',
     menu_composition: (initialValues?.menu_composition as Record<string, number>) ?? {},
@@ -131,6 +133,7 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
       creative_references: form.creative_references || null,
       desired_feeling: form.desired_feeling || null,
       constraints: form.constraints || null,
+      collection_format: isMenu ? form.collection_format : 'a_la_carte',
       exploration_mode: form.exploration_mode,
       generation_mode: form.generation_mode,
     }
@@ -195,17 +198,43 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
           </Field>
         )}
 
-        {/* Theme — menu_collection only */}
+        {/* Theme + Format — menu_collection only */}
         {form.brief_type === 'menu_collection' && (
-          <Field label="Theme" helper="What holds this menu together?">
-            <input
-              type="text"
-              value={form.menu_theme}
-              onChange={(e) => set('menu_theme', e.target.value)}
-              placeholder="e.g. Summer solstice dinner party, Levantine collaboration menu…"
-              className={inputCls}
-            />
-          </Field>
+          <>
+            <Field label="Collection Format">
+              <div className="flex gap-2 mt-1">
+                {([
+                  { value: 'a_la_carte', label: 'À la carte', description: 'A group of thematically coherent dishes guests order freely. No prescribed sequence.' },
+                  { value: 'set_menu', label: 'Set / tasting menu', description: 'Dishes designed to arrive in waves. Claude designs the progression arc.' },
+                ] as const).map(({ value, label, description }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => set('collection_format', value)}
+                    className={cn(
+                      'flex-1 text-left px-3.5 py-3 rounded-lg border transition-colors',
+                      form.collection_format === value
+                        ? 'bg-olive-faint border-olive/40'
+                        : 'bg-white border-olive/15 hover:border-olive/35'
+                    )}
+                  >
+                    <span className={cn('text-[12px] font-medium block mb-0.5', form.collection_format === value ? 'text-olive' : 'text-ink')}>{label}</span>
+                    <p className="text-[11px] text-ink-muted font-light leading-snug">{description}</p>
+                  </button>
+                ))}
+              </div>
+            </Field>
+
+            <Field label="Theme" helper="What holds this menu together?">
+              <input
+                type="text"
+                value={form.menu_theme}
+                onChange={(e) => set('menu_theme', e.target.value)}
+                placeholder="e.g. Summer solstice dinner party, Levantine collaboration menu…"
+                className={inputCls}
+              />
+            </Field>
+          </>
         )}
 
         <Field label="Strategic Role">

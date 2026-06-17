@@ -86,6 +86,31 @@ export type MenuItem = {
   updated_at: string
 }
 
+export type CollectionDishSlot = {
+  wave?: number
+  wave_order?: number
+  category: string
+  concept_name: string
+  one_line: string
+}
+
+export type CollectionWave = {
+  wave: number
+  feel: string
+  categories: string[]
+  dish_count: number
+}
+
+export type CollectionOutputData = {
+  type: 'collection'
+  collection_name: string
+  tensions: string
+  narrative: string
+  collection_format: 'a_la_carte' | 'set_menu'
+  waves?: CollectionWave[]
+  dishes: CollectionDishSlot[]
+}
+
 export type RdBrief = {
   id: string
   brief_type: 'dish' | 'menu_collection'
@@ -93,6 +118,7 @@ export type RdBrief = {
   menu_theme: string | null
   menu_composition: Record<string, number> | null
   ai_recommend_composition: boolean
+  collection_format: 'a_la_carte' | 'set_menu'
   strategic_roles: string[]
   format_familiarity: number | null
   flavor_discovery: number | null
@@ -103,7 +129,7 @@ export type RdBrief = {
   constraints: string | null
   exploration_mode: 'safe' | 'balanced' | 'exploratory'
   generation_mode: 'full' | 'fast'
-  output_data: {
+  output_data: CollectionOutputData | {
     narrative?: string
     recommendation?: string
     collection_name?: string

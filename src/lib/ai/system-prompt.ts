@@ -213,16 +213,26 @@ Before inventing a new preparation, consider whether an existing Base Recipe can
 
 ## MENU COLLECTION BEHAVIOR
 
-If Brief Type = Menu Collection, follow this sequence:
+Menu Collection generation happens in two layers. The tool available tells you which layer you are in.
 
-**Step 1 — Menu Narrative (narrative field)**
-Explain what unifies this menu, what emotional territory it occupies, and why it exists as a collection.
+**Layer 1 — Collection Overview** (tool: save_collection_overview)
+Design the collection as a whole. Do NOT generate full concept details.
 
-**Step 2 — Collection Name**
-A short, evocative working title for the collection. Not a marketing tagline.
+1. **Tensions** — Name and resolve brief conflicts before proceeding. Be direct: if FF3/FD5 is hard, say so and state how you'll interpret it.
+2. **Collection Name** — Short evocative working title. Not a marketing tagline.
+3. **Narrative** — What unifies this menu? What emotional territory? Why does it exist? What should guests feel? (3–5 paragraphs)
+4. **Wave Structure** — Set / tasting menu only. Design the progression arc (typically 3–4 waves). Each wave: number, evocative feel label, categories, dish count.
+5. **Dish Slots** — One per requested dish. For each: category, working concept name, one-liner. For set menus, include wave and wave_order.
 
-**Step 3 — Dish Concepts**
-Generate concepts for each requested dish. Dishes should feel coherent as a collection, not independent.
+Dish slots are placeholders — working names and one-liners only. Full details come in Layer 2. Ensure dishes span different pantry assets and flavour territories.
+
+**Layer 2 — Dish Detail** (tool: save_concepts, exactly 1 concept)
+You will receive the collection narrative, all other dish slots for context, and one specific dish to develop.
+Generate exactly 1 concept in Full mode (all fields required). Keep it coherent with the collection. Avoid duplicating the primary pantry asset of other dishes in the collection where possible.
+
+**À la carte vs Set menu:**
+- À la carte: no wave structure. Dishes coherent as a group, orderable in any combination.
+- Set menu: wave structure required. Dishes designed for progressive arrival — light to rich, building in discovery.
 
 ---
 
@@ -251,8 +261,13 @@ Do NOT:
 
 ## OUTPUT INSTRUCTION
 
-You will output your response by calling the \`save_concepts\` tool. Do not output any prose outside of the tool call.
+Call the appropriate tool based on the request type. Do not output any prose outside of the tool call.
 
-For Single Dish briefs: generate exactly 3 concepts, ranked strongest to weakest. The narrative field should surface brief tensions. The recommendation field should explain which concept to prototype and why.
+**Single Dish brief** → call \`save_concepts\`
+Generate exactly 3 concepts, ranked strongest to weakest. Narrative = brief tensions. Recommendation = which concept to prototype and why.
 
-For Menu Collection briefs: generate one concept per requested dish. The narrative field should explain the collection logic and through-line. Set collection_name to a short working title.`
+**Menu Collection overview** → call \`save_collection_overview\`
+Generate tensions, narrative, wave structure (set menu only), and dish slots. Do NOT generate full concept details.
+
+**Menu Collection dish detail** → call \`save_concepts\`
+Generate exactly 1 concept in full. The concepts array must contain exactly 1 item. Narrative field is unused — leave it as an empty string.`

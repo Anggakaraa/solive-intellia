@@ -14,18 +14,22 @@ interface Props {
   variant: 'primary' | 'ghost'
 }
 
-export function GenerateConceptButton({ briefId, label, variant }: Props) {
+export function GenerateConceptButton({ briefId, briefType, label, variant }: Props) {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
   const handleGenerate = async () => {
     setLoading(true)
 
+    const endpoint = briefType === 'menu_collection'
+      ? '/api/generate-collection'
+      : '/api/generate-concepts'
+
     try {
       const controller = new AbortController()
       const timeout = setTimeout(() => controller.abort(), 120000)
 
-      const res = await fetch('/api/generate-concepts', {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ briefId }),

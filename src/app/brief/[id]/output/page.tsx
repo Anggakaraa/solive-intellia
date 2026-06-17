@@ -7,6 +7,8 @@ import { ConceptTabs } from '@/components/ui/concept-tabs'
 import { ConceptCard } from '@/components/ui/concept-card'
 import type { ConceptCardData } from '@/components/ui/concept-card'
 import { SaveCollectionButton } from './SaveCollectionButton'
+import { CollectionOutput } from './CollectionOutput'
+import type { CollectionOutputData, RdConcept } from '@/lib/supabase/types'
 
 function toConceptCardData(row: Record<string, unknown>): ConceptCardData {
   return {
@@ -36,24 +38,23 @@ export default async function BriefOutputPage({ params }: { params: Promise<{ id
   const concepts: ConceptCardData[] = (rawConcepts ?? []).map(toConceptCardData)
 
   const isCollection = brief.brief_type === 'menu_collection'
+  const outputData = brief.output_data as CollectionOutputData | { narrative?: string; recommendation?: string; collection_name?: string } | null
+  const isNewCollectionFormat = isCollection && outputData && 'type' in outputData && outputData.type === 'collection'
 
   const title = isCollection
     ? (brief.menu_theme ?? 'Menu Collection')
     : (brief.category ?? 'Untitled Brief')
 
   const eyebrow = isCollection
-    ? 'R&D Output · Menu Collection'
+    ? `R&D Output · ${(brief as { collection_format?: string }).collection_format === 'set_menu' ? 'Set Menu' : 'Menu Collection'}`
     : 'R&D Output · Single Dish'
 
-  const outputData = brief.output_data as {
-    narrative?: string
-    recommendation?: string
-    collection_name?: string
-  } | null
+  const collectionOutputData = isNewCollectionFormat ? (outputData as CollectionOutputData) : null
+  const legacyOutputData = !isNewCollectionFormat ? outputData as { narrative?: string; recommendation?: string; collection_name?: string } | null : null
 
-  const narrative = outputData?.narrative ?? null
-  const recommendation = outputData?.recommendation ?? null
-  const collectionName = outputData?.collection_name ?? null
+  const narrative = legacyOutputData?.narrative ?? null
+  const recommendation = legacyOutputData?.recommendation ?? null
+  const collectionName = legacyOutputData?.collection_name ?? null
 
   return (
     <div className="max-w-3xl">
@@ -61,9 +62,9 @@ export default async function BriefOutputPage({ params }: { params: Promise<{ id
 
       <PageHeader
         eyebrow={eyebrow}
-        title={isCollection ? (collectionName ?? title) : title}
+        title={collectionOutputData?.collection_name ?? collectionName ?? title}
         subtitle={isCollection ? title : ((brief.strategic_roles as string[] | null)?.join(', ') ?? '')}
-        actions={isCollection && concepts.length > 0 ? (
+        actions={isCollection && !isNewCollectionFormat && concepts.length > 0 ? (
           <SaveCollectionButton
             briefId={id}
             collectionName={collectionName ?? title}
@@ -73,46 +74,66 @@ export default async function BriefOutputPage({ params }: { params: Promise<{ id
         ) : undefined}
       />
 
-      {/* Narrative card */}
-      {narrative && (
-        <SectionCard variant="muted" label={isCollection ? 'Collection Logic' : 'Brief Tensions'} className="mb-6">
-          <p className="text-sm text-ink-mid font-light leading-relaxed whitespace-pre-line">
-            {narrative}
-          </p>
-        </SectionCard>
-      )}
-
-      {concepts.length === 0 ? (
-        <div className="text-center py-16 text-ink-muted border border-dashed border-olive/25 rounded-lg">
-          <p className="text-sm font-light">No concepts found for this brief.</p>
-        </div>
+      {isNewCollectionFormat && collectionOutputData ? (
+        /* New two-layer collection output */
+        <CollectionOutput
+          briefId={id}
+          outputData={collectionOutputData}
+          existingConcepts={rawConcepts as unknown as RdConcept[]}
+          ff={brief.format_familiarity as number | null}
+          fd={brief.flavor_discovery as number | null}
+        />
       ) : isCollection ? (
-        /* Menu collection — stacked cards */
-        <div className="space-y-5">
-          <p className="text-[10px] uppercase tracking-[2px] text-ink-muted">
-            {concepts.length} dishes
-          </p>
-          {concepts.map((concept) => (
-            <ConceptCard
-              key={concept.id}
-              concept={concept}
+        <>
+          {/* Legacy collection output — stacked cards */}
+          {narrative && (
+            <SectionCard variant="muted" label="Collection Logic" className="mb-6">
+              <p className="text-sm text-ink-mid font-light leading-relaxed whitespace-pre-line">{narrative}</p>
+            </SectionCard>
+          )}
+          {concepts.length === 0 ? (
+            <div className="text-center py-16 text-ink-muted border border-dashed border-olive/25 rounded-lg">
+              <p className="text-sm font-light">No concepts found for this brief.</p>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              <p className="text-[10px] uppercase tracking-[2px] text-ink-muted">{concepts.length} dishes</p>
+              {concepts.map((concept) => (
+                <ConceptCard
+                  key={concept.id}
+                  concept={concept}
+                  ff={brief.format_familiarity as number | null}
+                  fd={brief.flavor_discovery as number | null}
+                  strategicRoles={(brief.strategic_roles as string[] | null) ?? []}
+                  isSaved={concept.status === 'saved'}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          {/* Single dish — tabbed alternatives */}
+          {narrative && (
+            <SectionCard variant="muted" label="Brief Tensions" className="mb-6">
+              <p className="text-sm text-ink-mid font-light leading-relaxed whitespace-pre-line">{narrative}</p>
+            </SectionCard>
+          )}
+          {concepts.length === 0 ? (
+            <div className="text-center py-16 text-ink-muted border border-dashed border-olive/25 rounded-lg">
+              <p className="text-sm font-light">No concepts found for this brief.</p>
+            </div>
+          ) : (
+            <ConceptTabs
+              concepts={concepts}
               ff={brief.format_familiarity as number | null}
               fd={brief.flavor_discovery as number | null}
               strategicRoles={(brief.strategic_roles as string[] | null) ?? []}
-              isSaved={concept.status === 'saved'}
+              recommendation={recommendation ?? undefined}
+              savedIds={concepts.filter(c => c.status === 'saved').map(c => c.id)}
             />
-          ))}
-        </div>
-      ) : (
-        /* Single dish — tabbed alternatives */
-        <ConceptTabs
-          concepts={concepts}
-          ff={brief.format_familiarity as number | null}
-          fd={brief.flavor_discovery as number | null}
-          strategicRoles={(brief.strategic_roles as string[] | null) ?? []}
-          recommendation={recommendation ?? undefined}
-          savedIds={concepts.filter(c => c.status === 'saved').map(c => c.id)}
-        />
+          )}
+        </>
       )}
     </div>
   )

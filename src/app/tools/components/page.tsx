@@ -351,7 +351,7 @@ export default function ComponentLibraryPage() {
             label="Format Familiarity (FF)"
             description="How recognisable should the format feel?"
             value={sliderVal}
-            onChange={setSliderVal}
+            onChange={(v) => setSliderVal(v ?? 1)}
             max={5}
           />
         </div>

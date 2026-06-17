@@ -128,11 +128,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Brief not found' }, { status: 404 })
     }
 
-    const isCollection = brief.brief_type === 'menu_collection'
-    // Collections always run in fast mode — one concept per dish means full breakdown
-    // per dish is overkill and pushes generation past timeout limits
-    const isFast = isCollection || brief.generation_mode === 'fast'
-    const maxTokens = isFast ? 3000 : 4000
+    const isFast = brief.generation_mode === 'fast'
+    // Full mode: 3 concepts with all fields + narrative + recommendation can hit 4000+
+    // giving 6000 headroom ensures we never truncate mid-tool-call
+    const maxTokens = isFast ? 2500 : 6000
 
     console.log('[generate-concepts] Calling Claude for brief:', briefId, `(${brief.brief_type}, ${brief.generation_mode}, maxTokens: ${maxTokens})`)
     const t0 = Date.now()

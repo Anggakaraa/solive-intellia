@@ -21,24 +21,33 @@ export function GenerateConceptButton({ briefId, label, variant }: Props) {
   const handleGenerate = async () => {
     setLoading(true)
 
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 90000)
+    try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 120000)
 
-    const res = await fetch('/api/generate-concepts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ briefId }),
-      signal: controller.signal,
-    }).finally(() => clearTimeout(timeout))
+      const res = await fetch('/api/generate-concepts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ briefId }),
+        signal: controller.signal,
+      }).finally(() => clearTimeout(timeout))
 
-    if (!res.ok) {
-      const { error } = await res.json().catch(() => ({ error: 'Unknown error' }))
-      toast.error(error ?? 'Failed to generate concepts')
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({ error: 'Unknown error' }))
+        toast.error(error ?? 'Failed to generate concepts')
+        return
+      }
+
+      router.push(`/brief/${briefId}/output`)
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        toast.error('Generation timed out — try Fast mode or reduce the number of dishes')
+      } else {
+        toast.error('Something went wrong. Please try again.')
+      }
+    } finally {
       setLoading(false)
-      return
     }
-
-    router.push(`/brief/${briefId}/output`)
   }
 
   return (

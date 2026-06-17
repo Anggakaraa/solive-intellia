@@ -110,7 +110,7 @@ function buildBriefMessage(brief: Record<string, unknown>): string {
   return lines.join('\n')
 }
 
-export const maxDuration = 60
+export const maxDuration = 120
 
 export async function POST(req: NextRequest) {
   try {
@@ -128,12 +128,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Brief not found' }, { status: 404 })
     }
 
-    console.log('[generate-concepts] Calling Claude for brief:', briefId)
+    const isCollection = brief.brief_type === 'menu_collection'
+    const isFast = brief.generation_mode === 'fast'
+    // collections need more output tokens (1 concept per dish vs 3 for single dish)
+    // fast mode cuts ~60% of output so 3000 is plenty
+    const maxTokens = isFast ? 3000 : isCollection ? 7000 : 4000
+
+    console.log('[generate-concepts] Calling Claude for brief:', briefId, `(${brief.brief_type}, ${brief.generation_mode}, maxTokens: ${maxTokens})`)
     const t0 = Date.now()
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 4000,
+      max_tokens: maxTokens,
       system: [
         {
           type: 'text',
@@ -146,7 +152,11 @@ export async function POST(req: NextRequest) {
       messages: [{ role: 'user', content: buildBriefMessage(brief) }],
     })
 
-    console.log(`[generate-concepts] Claude responded in ${Date.now() - t0}ms`)
+    console.log(`[generate-concepts] Claude responded in ${Date.now() - t0}ms, stop_reason: ${message.stop_reason}`)
+
+    if (message.stop_reason === 'max_tokens') {
+      return NextResponse.json({ error: 'Generation exceeded token limit — try Fast mode or reduce the number of dishes' }, { status: 500 })
+    }
 
     const toolUse = message.content.find((b) => b.type === 'tool_use')
     if (!toolUse || toolUse.type !== 'tool_use') {

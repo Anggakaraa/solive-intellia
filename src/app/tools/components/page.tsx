@@ -389,7 +389,7 @@ export default function ComponentLibraryPage() {
           strategicRoles={['Brand Driver']}
         />
 
-        <Label className="mt-6">With isSaved=true</Label>
+        <div className="mt-6"><Label>With isSaved=true</Label></div>
         <ConceptCard
           concept={{ ...SAMPLE_CONCEPT, id: 'lib-demo-saved', status: 'saved' }}
           ff={4}

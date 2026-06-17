@@ -280,33 +280,35 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
           </div>
         </Field>
 
-        {/* Generation Mode */}
-        <Field label="Generation Mode" helper="Controls output depth. Fast is useful for rapid ideation.">
-          <div className="flex gap-2 mt-1">
-            {([
-              { value: 'full', label: 'Full', description: 'Complete concept with breakdown, presentation, feasibility, and experiment focus.' },
-              { value: 'fast', label: 'Fast', description: 'Name, one-liner, why it could win, and experiment focus only. Lower token cost.' },
-            ] as const).map(({ value, label, description }) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => set('generation_mode', value)}
-                className={cn(
-                  'flex-1 text-left px-3.5 py-3 rounded-lg border transition-colors',
-                  form.generation_mode === value
-                    ? 'bg-olive-faint border-olive/40'
-                    : 'bg-white border-olive/15 hover:border-olive/35'
-                )}
-              >
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className={cn('text-[12px] font-medium', form.generation_mode === value ? 'text-olive' : 'text-ink')}>{label}</span>
-                  {value === 'full' && <span className="text-[9px] uppercase tracking-[1px] text-ink-muted">Default</span>}
-                </div>
-                <p className="text-[11px] text-ink-muted font-light leading-snug">{description}</p>
-              </button>
-            ))}
-          </div>
-        </Field>
+        {/* Generation Mode — single dish only */}
+        {form.brief_type === 'dish' && (
+          <Field label="Generation Mode" helper="Controls output depth. Fast is useful for rapid ideation.">
+            <div className="flex gap-2 mt-1">
+              {([
+                { value: 'full', label: 'Full', description: 'Complete concept with breakdown, presentation, feasibility, and experiment focus.' },
+                { value: 'fast', label: 'Fast', description: 'Name, one-liner, why it could win, and experiment focus only. Lower token cost.' },
+              ] as const).map(({ value, label, description }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => set('generation_mode', value)}
+                  className={cn(
+                    'flex-1 text-left px-3.5 py-3 rounded-lg border transition-colors',
+                    form.generation_mode === value
+                      ? 'bg-olive-faint border-olive/40'
+                      : 'bg-white border-olive/15 hover:border-olive/35'
+                  )}
+                >
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className={cn('text-[12px] font-medium', form.generation_mode === value ? 'text-olive' : 'text-ink')}>{label}</span>
+                    {value === 'full' && <span className="text-[9px] uppercase tracking-[1px] text-ink-muted">Default</span>}
+                  </div>
+                  <p className="text-[11px] text-ink-muted font-light leading-snug">{description}</p>
+                </button>
+              ))}
+            </div>
+          </Field>
+        )}
 
         {/* Composition — menu_collection only */}
         {form.brief_type === 'menu_collection' && (

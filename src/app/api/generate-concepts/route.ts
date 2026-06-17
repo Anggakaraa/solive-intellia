@@ -129,10 +129,10 @@ export async function POST(req: NextRequest) {
     }
 
     const isCollection = brief.brief_type === 'menu_collection'
-    const isFast = brief.generation_mode === 'fast'
-    // collections need more output tokens (1 concept per dish vs 3 for single dish)
-    // fast mode cuts ~60% of output so 3000 is plenty
-    const maxTokens = isFast ? 3000 : isCollection ? 7000 : 4000
+    // Collections always run in fast mode — one concept per dish means full breakdown
+    // per dish is overkill and pushes generation past timeout limits
+    const isFast = isCollection || brief.generation_mode === 'fast'
+    const maxTokens = isFast ? 3000 : 4000
 
     console.log('[generate-concepts] Calling Claude for brief:', briefId, `(${brief.brief_type}, ${brief.generation_mode}, maxTokens: ${maxTokens})`)
     const t0 = Date.now()

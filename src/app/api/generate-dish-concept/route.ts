@@ -111,7 +111,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Collection overview not found — generate overview first' }, { status: 400 })
     }
 
-    console.log('[generate-dish-concept] Calling Claude for:', slot.concept_name)
+    const userMessage = buildDishMessage(brief, outputData, slot)
+    const systemChars = SYSTEM_PROMPT.length
+    const userChars = userMessage.length
+    console.log('[generate-dish-concept] Payload:', {
+      dish: slot.concept_name,
+      systemChars,
+      userChars,
+      totalChars: systemChars + userChars,
+      estInputTokens: Math.round((systemChars + userChars) / 4),
+      maxTokens: 2000,
+    })
     const t0 = Date.now()
 
     const message = await anthropic.messages.create({
@@ -120,10 +130,15 @@ export async function POST(req: NextRequest) {
       system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
       tools: [SAVE_DISH_CONCEPT_TOOL],
       tool_choice: { type: 'any' },
-      messages: [{ role: 'user', content: buildDishMessage(brief, outputData, slot) }],
+      messages: [{ role: 'user', content: userMessage }],
     })
 
-    console.log(`[generate-dish-concept] Claude responded in ${Date.now() - t0}ms`)
+    console.log(`[generate-dish-concept] Claude responded in ${Date.now() - t0}ms`, {
+      stop_reason: message.stop_reason,
+      input_tokens: message.usage.input_tokens,
+      output_tokens: message.usage.output_tokens,
+      cache_read_tokens: (message.usage as unknown as { cache_read_input_tokens?: number }).cache_read_input_tokens ?? 0,
+    })
 
     if (message.stop_reason === 'max_tokens') {
       return NextResponse.json({ error: 'Generation exceeded token limit' }, { status: 500 })

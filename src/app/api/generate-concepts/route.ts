@@ -133,7 +133,17 @@ export async function POST(req: NextRequest) {
     // giving 6000 headroom ensures we never truncate mid-tool-call
     const maxTokens = isFast ? 2500 : 6000
 
-    console.log('[generate-concepts] Calling Claude for brief:', briefId, `(${brief.brief_type}, ${brief.generation_mode}, maxTokens: ${maxTokens})`)
+    const userMessage = buildBriefMessage(brief)
+    const systemChars = SYSTEM_PROMPT.length
+    const userChars = userMessage.length
+    console.log('[generate-concepts] Payload:', {
+      mode: `${brief.brief_type} / ${brief.generation_mode}`,
+      maxTokens,
+      systemChars,
+      userChars,
+      totalChars: systemChars + userChars,
+      estInputTokens: Math.round((systemChars + userChars) / 4),
+    })
     const t0 = Date.now()
 
     const message = await anthropic.messages.create({
@@ -148,10 +158,15 @@ export async function POST(req: NextRequest) {
       ],
       tools: [SAVE_CONCEPTS_TOOL],
       tool_choice: { type: 'any' },
-      messages: [{ role: 'user', content: buildBriefMessage(brief) }],
+      messages: [{ role: 'user', content: userMessage }],
     })
 
-    console.log(`[generate-concepts] Claude responded in ${Date.now() - t0}ms, stop_reason: ${message.stop_reason}`)
+    console.log(`[generate-concepts] Claude responded in ${Date.now() - t0}ms`, {
+      stop_reason: message.stop_reason,
+      input_tokens: message.usage.input_tokens,
+      output_tokens: message.usage.output_tokens,
+      cache_read_tokens: (message.usage as unknown as { cache_read_input_tokens?: number }).cache_read_input_tokens ?? 0,
+    })
 
     if (message.stop_reason === 'max_tokens') {
       return NextResponse.json({ error: 'Generation exceeded token limit — try Fast mode or reduce the number of dishes' }, { status: 500 })

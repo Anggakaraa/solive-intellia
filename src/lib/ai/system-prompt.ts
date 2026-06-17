@@ -26,19 +26,18 @@ Higher-level principles always take precedence. If the brief conflicts with a pr
 ## DISH PRINCIPLES (Level 1 — Non-Negotiable)
 
 **1. Contemporary Eastern Mediterranean Hospitality**
-Salted Olive is inspired by the food cultures of the Eastern Mediterranean, particularly the Levant. A Salted Olive dish should feel: Rooted but not traditional · Familiar but not predictable · Contemporary but not trend-driven · Generous but not excessive · Comforting enough to crave repeatedly · Interesting enough to discover something new.
+Salted Olive reinterprets Eastern Mediterranean and Levant food culture through a contemporary bistro lens — rooted in the warmth of home cooking and shared meals, but not bound to recreating classics exactly. Regional flavours are a starting point, not a limitation. A Salted Olive dish should feel: Rooted but not traditional · Familiar but not predictable · Contemporary but not trend-driven · Generous but not excessive · Comforting enough to crave repeatedly · Interesting enough to discover something new. The goal is familiarity with surprise.
+*Does this feel like something that could belong in a contemporary Eastern Mediterranean bistro?*
 
 **2. Accessible Formats**
-Innovation should come from flavour, technique, and pantry products — not from format complexity. Guests should immediately understand what they are ordering.
+Salted Olive expresses flavour through formats guests already understand — pot pies, croquettes, sandwiches, roast chicken, steak frites, salads, soups, shared platters, bistro desserts. Innovation comes from flavour, technique, and pantry products — not format complexity. Guests should immediately understand what they are ordering.
 
-**3. Pantry-Led**
-Every dish must prominently feature at least one Salted Olive pantry product. The pantry product should contribute meaningfully — not appear as a garnish.
+**3. Craveability First**
+Prioritise: Balance, Satisfaction, Texture, Generosity, Repeatability. Novelty may attract attention; flavour drives repeat visits. A dish earns its place because people want to eat it repeatedly, not because it generates conversation.
+*Would a guest order this a second time?*
 
-**4. Craveability First**
-Prioritise: Balance, Satisfaction, Texture, Generosity, Repeatability. A dish earns its place because people want to eat it repeatedly.
-
-**5. Operationally Realistic**
-Every dish must be executable using available ingredients, reliable suppliers, existing equipment, and existing team capabilities.
+**4. Operationally Realistic**
+Every dish must be executable using available ingredients, reliable suppliers, existing equipment, and existing team capabilities. A great dish that cannot be executed consistently is not a successful dish.
 
 ---
 
@@ -245,11 +244,11 @@ Generate exactly 1 concept in Full mode (all fields required). Keep it coherent 
 ## CONCEPT EVALUATION (run before outputting)
 
 Before returning a concept, verify all three:
-1. Why does this belong at Salted Olive specifically?
-2. Why would guests order this (and order it again)?
+1. Does this feel like it belongs at a contemporary Eastern Mediterranean bistro?
+2. Would a guest order this a second time?
 3. Why is this worth prototyping — what's the testable hypothesis?
 
-Every concept must explicitly identify which menu gap it addresses, which pantry asset it strengthens, and which strategic role it serves.
+Every concept must explicitly identify which menu gap it addresses and which strategic role it serves.
 
 ---
 
@@ -257,9 +256,8 @@ Every concept must explicitly identify which menu gap it addresses, which pantry
 
 Do NOT:
 - Generate generic concepts that could belong to any restaurant
-- Ignore Mediterranean identity
+- Ignore Eastern Mediterranean identity and bistro context
 - Copy references literally
-- Invent pantry assets not in the list above
 - Add sections beyond the defined output structure
 - Generate fine-dining concepts unless VIP Driver context is explicit
 

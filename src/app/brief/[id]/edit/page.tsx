@@ -38,6 +38,7 @@ export default async function EditBriefPage({ params }: { params: Promise<{ id: 
           menu_theme: brief.menu_theme ?? '',
           menu_composition: (brief.menu_composition as Record<string, number>) ?? {},
           ai_recommend_composition: brief.ai_recommend_composition ?? false,
+          collection_format: (brief.collection_format as 'a_la_carte' | 'set_menu') ?? 'a_la_carte',
           strategic_roles: brief.strategic_roles ?? [],
           format_familiarity: brief.format_familiarity ?? null,
           flavor_discovery: brief.flavor_discovery ?? null,
@@ -46,6 +47,8 @@ export default async function EditBriefPage({ params }: { params: Promise<{ id: 
           creative_references: brief.creative_references ?? '',
           desired_feeling: brief.desired_feeling ?? '',
           constraints: brief.constraints ?? '',
+          exploration_mode: (brief.exploration_mode as 'safe' | 'balanced' | 'exploratory') ?? 'balanced',
+          generation_mode: (brief.generation_mode as 'full' | 'fast') ?? 'full',
         }}
         categoryOptions={categories?.map((c) => c.name) ?? []}
         roleOptions={roles?.map((r) => r.name) ?? []}

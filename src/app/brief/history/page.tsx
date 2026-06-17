@@ -10,7 +10,7 @@ export default async function BriefHistoryPage() {
 
   const { data: briefs } = await supabase
     .from('rd_briefs')
-    .select('id, created_at, brief_type, category, menu_theme, strategic_roles, opportunity')
+    .select('id, created_at, brief_type, category, menu_theme, strategic_roles, opportunity, exploration_mode, generation_mode, collection_format')
     .order('created_at', { ascending: false })
 
   return (
@@ -40,7 +40,7 @@ export default async function BriefHistoryPage() {
               className="group flex items-start justify-between gap-4 bg-white border border-olive/15 rounded-lg px-5 py-4 hover:border-olive/40 transition-colors"
             >
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1.5">
+                <div className="flex items-center gap-2 flex-wrap mb-1.5">
                   {brief.brief_type === 'menu_collection' ? (
                     <Pill variant="olive">{brief.menu_theme ?? 'Menu Collection'}</Pill>
                   ) : brief.category ? (
@@ -49,6 +49,15 @@ export default async function BriefHistoryPage() {
                   {brief.strategic_roles?.map((r: string) => (
                     <Pill key={r} variant="default">{r}</Pill>
                   ))}
+                  {brief.brief_type === 'menu_collection' && brief.collection_format && (
+                    <Pill variant="cream">{brief.collection_format === 'set_menu' ? 'Set Menu' : 'À la carte'}</Pill>
+                  )}
+                  {brief.exploration_mode && brief.exploration_mode !== 'balanced' && (
+                    <Pill variant="cream">{brief.exploration_mode.charAt(0).toUpperCase() + brief.exploration_mode.slice(1)}</Pill>
+                  )}
+                  {brief.generation_mode === 'fast' && (
+                    <Pill variant="faint">Fast</Pill>
+                  )}
                   <span className="text-[11px] text-ink-muted ml-auto">
                     {new Date(brief.created_at).toLocaleDateString('en-AU', {
                       day: 'numeric',

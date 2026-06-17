@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { FolderOpen } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { FolderOpen, FolderCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { ghostBtnCls } from '@/lib/styles'
@@ -11,49 +11,46 @@ interface Props {
   briefId: string
   collectionName: string
   menuTheme: string | null
-  conceptIds: string[]
+  conceptCount?: number
 }
 
-export function SaveCollectionButton({ briefId, collectionName, menuTheme, conceptIds }: Props) {
+export function SaveCollectionButton({ briefId, collectionName, menuTheme, conceptCount = 0 }: Props) {
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [checking, setChecking] = useState(true)
+
+  useEffect(() => {
+    const check = async () => {
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('saved_collections')
+        .select('id')
+        .eq('brief_id', briefId)
+        .maybeSingle()
+      setSaved(!!data)
+      setChecking(false)
+    }
+    check()
+  }, [briefId])
 
   const handleSave = async () => {
     setSaving(true)
     const supabase = createClient()
 
-    const { data: collection, error } = await supabase
+    const { error } = await supabase
       .from('saved_collections')
       .insert({ name: collectionName, brief_id: briefId, menu_theme: menuTheme, status: 'saved' })
-      .select('id')
-      .single()
 
-    if (error || !collection) {
+    if (error) {
       toast.error('Failed to save collection')
-      setSaving(false)
-      return
-    }
-
-    const links = conceptIds.map((conceptId, i) => ({
-      collection_id: collection.id,
-      concept_id: conceptId,
-      wave: 1,
-      wave_order: i + 1,
-    }))
-
-    const { error: linkError } = await supabase
-      .from('saved_collection_concepts')
-      .insert(links)
-
-    if (linkError) {
-      toast.error('Collection saved but dish links failed')
     } else {
       toast.success('Collection saved')
       setSaved(true)
     }
-
     setSaving(false)
   }
+
+  if (checking) return null
 
   return (
     <button
@@ -61,8 +58,14 @@ export function SaveCollectionButton({ briefId, collectionName, menuTheme, conce
       disabled={saved || saving}
       className={cn('flex items-center gap-1.5 disabled:opacity-50', ghostBtnCls)}
     >
-      <FolderOpen size={13} />
-      {saving ? 'Saving…' : saved ? 'Collection Saved' : 'Save Collection'}
+      {saved ? <FolderCheck size={13} /> : <FolderOpen size={13} />}
+      {saving
+        ? 'Saving…'
+        : saved
+        ? 'Saved to collections'
+        : conceptCount > 0
+        ? `Save Collection · ${conceptCount} dish${conceptCount !== 1 ? 'es' : ''} developed`
+        : 'Save Collection'}
     </button>
   )
 }

@@ -18,11 +18,11 @@ const SAVE_COLLECTION_OVERVIEW_TOOL: Anthropic.Tool = {
       },
       tensions: {
         type: 'string',
-        description: 'Brief tensions analysis — name and resolve conflicts before generating dish slots. 2–4 paragraphs.',
+        description: 'Name and resolve brief conflicts before proceeding. 2–3 sentences max — one conflict and its resolution per sentence.',
       },
       narrative: {
         type: 'string',
-        description: 'Menu narrative explaining the collection identity, emotional territory, and intent. 3–5 paragraphs.',
+        description: '2 paragraphs max. Para 1: what unifies this collection and its identity. Para 2: the guest emotional arc from first dish to last.',
       },
       waves: {
         type: 'array',
@@ -57,7 +57,7 @@ const SAVE_COLLECTION_OVERVIEW_TOOL: Anthropic.Tool = {
   },
 }
 
-function buildCollectionMessage(brief: Record<string, unknown>): string {
+function buildCollectionMessage(brief: Record<string, unknown>, recentConcepts: string[] = []): string {
   const isSetMenu = brief.collection_format === 'set_menu'
   const lines: string[] = [
     `Generate a collection overview for this Menu Collection brief.\n`,
@@ -97,6 +97,10 @@ function buildCollectionMessage(brief: Record<string, unknown>): string {
 
   lines.push('\nGenerate dish slots only (concept_name + one_line). Do not generate full concept details — those come later per dish.')
 
+  if (recentConcepts.length > 0) {
+    lines.push(`\nRecently generated concepts across all briefs (avoid repeating these approaches, primary proteins, or pantry pairings):\n${recentConcepts.map(n => `- ${n}`).join('\n')}`)
+  }
+
   return lines.join('\n')
 }
 
@@ -115,16 +119,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Brief not found' }, { status: 404 })
     }
 
-    const userMessage = buildCollectionMessage(brief)
-    const systemChars = SYSTEM_PROMPT.length
-    const userChars = userMessage.length
-    console.log('[generate-collection] Payload:', {
+    const { data: recentRaw } = await supabase
+      .from('rd_concepts')
+      .select('concept_name')
+      .order('created_at', { ascending: false })
+      .limit(15)
+    const recentConcepts = (recentRaw ?? []).map((r) => r.concept_name)
+
+    const userMessage = buildCollectionMessage(brief, recentConcepts)
+    const estInputTokens = Math.round(SYSTEM_PROMPT.length / 3) + Math.round(userMessage.length / 4)
+    console.log('[generate-collection] Calling Claude', {
       format: brief.collection_format ?? 'a_la_carte',
-      systemChars,
-      userChars,
-      totalChars: systemChars + userChars,
-      estInputTokens: Math.round((systemChars + userChars) / 4),
-      maxTokens: 4000,
+      estInputTokens,
+      maxOutputTokens: 4000,
     })
     const t0 = Date.now()
 
@@ -137,11 +144,12 @@ export async function POST(req: NextRequest) {
       messages: [{ role: 'user', content: userMessage }],
     })
 
-    console.log(`[generate-collection] Claude responded in ${Date.now() - t0}ms`, {
+    const cacheRead = (message.usage as unknown as { cache_read_input_tokens?: number }).cache_read_input_tokens ?? 0
+    console.log(`[generate-collection] Done in ${Date.now() - t0}ms`, {
       stop_reason: message.stop_reason,
-      input_tokens: message.usage.input_tokens,
+      input_tokens: message.usage.input_tokens + cacheRead,
       output_tokens: message.usage.output_tokens,
-      cache_read_tokens: (message.usage as unknown as { cache_read_input_tokens?: number }).cache_read_input_tokens ?? 0,
+      cache_hit: cacheRead > 0,
     })
 
     if (message.stop_reason === 'max_tokens') {
@@ -161,18 +169,34 @@ export async function POST(req: NextRequest) {
       dishes: CollectionDishSlot[]
     }
 
-    await supabase.from('rd_briefs').update({
-      output_data: {
-        type: 'collection',
-        collection_name: output.collection_name,
-        tensions: output.tensions,
-        narrative: output.narrative,
-        collection_format: brief.collection_format ?? 'a_la_carte',
-        waves: output.waves ?? null,
-        dishes: output.dishes,
-      },
-    }).eq('id', briefId)
+    console.log('[generate-collection] Saving output_data:', {
+      collection_name: output.collection_name,
+      dish_count: output.dishes?.length ?? 0,
+      wave_count: output.waves?.length ?? 0,
+      collection_format: brief.collection_format,
+    })
 
+    const outputData = {
+      type: 'collection',
+      collection_name: output.collection_name,
+      tensions: output.tensions,
+      narrative: output.narrative,
+      collection_format: brief.collection_format ?? 'a_la_carte',
+      waves: output.waves ?? null,
+      dishes: output.dishes,
+    }
+
+    const { error: updateError } = await supabase
+      .from('rd_briefs')
+      .update({ output_data: outputData })
+      .eq('id', briefId)
+
+    if (updateError) {
+      console.error('[generate-collection] DB update failed:', updateError)
+      return NextResponse.json({ error: `Failed to save: ${updateError.message}` }, { status: 500 })
+    }
+
+    console.log('[generate-collection] Saved successfully')
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('generate-collection error:', err)

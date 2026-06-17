@@ -24,32 +24,32 @@ const SAVE_DISH_CONCEPT_TOOL: Anthropic.Tool = {
             breakdown: {
               type: 'object',
               properties: {
-                hero: { type: 'string' },
-                flavor_drivers: { type: 'array', items: { type: 'string' } },
-                textures: { type: 'array', items: { type: 'string' } },
-                key_contrast: { type: 'string' },
+                hero: { type: 'string', description: '1 short phrase — primary ingredient and technique.' },
+                flavor_drivers: { type: 'array', items: { type: 'string' }, description: '3 items max.' },
+                textures: { type: 'array', items: { type: 'string' }, description: '3 items max.' },
+                key_contrast: { type: 'string', description: '1 sentence.' },
               },
               required: ['hero', 'flavor_drivers', 'textures', 'key_contrast'],
             },
-            presentation: { type: 'string' },
+            presentation: { type: 'string', description: '2 sentences max. What the dish looks like on the plate and how it arrives.' },
             why_it_could_win: {
               type: 'object',
               properties: {
-                menu_gap: { type: 'string' },
-                emotional_trigger: { type: 'string' },
-                salted_olive: { type: 'string' },
+                menu_gap: { type: 'string', description: '1 sentence. Which specific gap this addresses.' },
+                emotional_trigger: { type: 'string', description: '1 sentence. What the guest feels.' },
+                salted_olive: { type: 'string', description: '1 sentence. Why this belongs at Salted Olive specifically.' },
               },
               required: ['menu_gap', 'emotional_trigger', 'salted_olive'],
             },
             feasibility: {
               type: 'object',
               properties: {
-                assets_leveraged: { type: 'array', items: { type: 'string' } },
-                watchouts: { type: 'array', items: { type: 'string' } },
+                assets_leveraged: { type: 'array', items: { type: 'string' }, description: '3 items max.' },
+                watchouts: { type: 'array', items: { type: 'string' }, description: '3 items max.' },
               },
               required: ['assets_leveraged', 'watchouts'],
             },
-            experiment_focus: { type: 'array', items: { type: 'string' } },
+            experiment_focus: { type: 'array', items: { type: 'string' }, description: '3 items max.' },
           },
           required: ['concept_name', 'one_line', 'breakdown', 'presentation', 'why_it_could_win', 'feasibility', 'experiment_focus'],
         },
@@ -112,15 +112,11 @@ export async function POST(req: NextRequest) {
     }
 
     const userMessage = buildDishMessage(brief, outputData, slot)
-    const systemChars = SYSTEM_PROMPT.length
-    const userChars = userMessage.length
-    console.log('[generate-dish-concept] Payload:', {
+    const estInputTokens = Math.round(SYSTEM_PROMPT.length / 3) + Math.round(userMessage.length / 4)
+    console.log('[generate-dish-concept] Calling Claude', {
       dish: slot.concept_name,
-      systemChars,
-      userChars,
-      totalChars: systemChars + userChars,
-      estInputTokens: Math.round((systemChars + userChars) / 4),
-      maxTokens: 2000,
+      estInputTokens,
+      maxOutputTokens: 2000,
     })
     const t0 = Date.now()
 
@@ -133,11 +129,12 @@ export async function POST(req: NextRequest) {
       messages: [{ role: 'user', content: userMessage }],
     })
 
-    console.log(`[generate-dish-concept] Claude responded in ${Date.now() - t0}ms`, {
+    const cacheRead = (message.usage as unknown as { cache_read_input_tokens?: number }).cache_read_input_tokens ?? 0
+    console.log(`[generate-dish-concept] Done in ${Date.now() - t0}ms`, {
       stop_reason: message.stop_reason,
-      input_tokens: message.usage.input_tokens,
+      input_tokens: message.usage.input_tokens + cacheRead,
       output_tokens: message.usage.output_tokens,
-      cache_read_tokens: (message.usage as unknown as { cache_read_input_tokens?: number }).cache_read_input_tokens ?? 0,
+      cache_hit: cacheRead > 0,
     })
 
     if (message.stop_reason === 'max_tokens') {

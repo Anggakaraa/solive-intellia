@@ -29,6 +29,11 @@ export default async function BriefDetailPage({ params }: { params: Promise<{ id
 
   if (!brief) notFound()
 
+  const hasCollectionOverview =
+    brief.brief_type === 'menu_collection' &&
+    (brief.output_data as { type?: string } | null)?.type === 'collection'
+  const hasOutput = (concepts && concepts.length > 0) || hasCollectionOverview
+
   const dateStr = new Date(brief.created_at).toLocaleDateString('en-AU', {
     day: 'numeric',
     month: 'long',
@@ -150,22 +155,28 @@ export default async function BriefDetailPage({ params }: { params: Promise<{ id
           )}
         </div>
 
-        {concepts && concepts.length > 0 ? (
+        {hasOutput ? (
           <div>
             <div className="bg-white border border-olive/15 rounded-lg px-5 py-4 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-ink">
-                  {concepts.length} concept{concepts.length !== 1 ? 's' : ''} generated
+                  {hasCollectionOverview
+                    ? concepts && concepts.length > 0
+                      ? `Collection overview · ${concepts.length} dish concept${concepts.length !== 1 ? 's' : ''}`
+                      : 'Collection overview generated'
+                    : `${concepts!.length} concept${concepts!.length !== 1 ? 's' : ''} generated`}
                 </p>
                 <p className="text-[12px] text-ink-muted font-light mt-0.5">
-                  Last updated {new Date(concepts[concepts.length - 1].created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}
+                  {concepts && concepts.length > 0
+                    ? `Last updated ${new Date(concepts[concepts.length - 1].created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}`
+                    : 'Saved'}
                 </p>
               </div>
               <Link
                 href={`/brief/${id}/output`}
                 className="text-[12px] text-olive font-medium hover:underline shrink-0"
               >
-                View AI Output →
+                View Output →
               </Link>
             </div>
             <div className="pt-3">

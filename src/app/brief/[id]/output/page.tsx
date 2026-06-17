@@ -64,13 +64,21 @@ export default async function BriefOutputPage({ params }: { params: Promise<{ id
         eyebrow={eyebrow}
         title={collectionOutputData?.collection_name ?? collectionName ?? title}
         subtitle={isCollection ? title : ((brief.strategic_roles as string[] | null)?.join(', ') ?? '')}
-        actions={isCollection && !isNewCollectionFormat && concepts.length > 0 ? (
-          <SaveCollectionButton
-            briefId={id}
-            collectionName={collectionName ?? title}
-            menuTheme={brief.menu_theme ?? null}
-            conceptIds={concepts.map((c) => c.id)}
-          />
+        actions={isCollection ? (
+          isNewCollectionFormat && collectionOutputData ? (
+            <SaveCollectionButton
+              briefId={id}
+              collectionName={collectionOutputData.collection_name}
+              menuTheme={brief.menu_theme ?? null}
+              conceptCount={rawConcepts?.length ?? 0}
+            />
+          ) : !isNewCollectionFormat && concepts.length > 0 ? (
+            <SaveCollectionButton
+              briefId={id}
+              collectionName={collectionName ?? title}
+              menuTheme={brief.menu_theme ?? null}
+            />
+          ) : undefined
         ) : undefined}
       />
 

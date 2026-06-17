@@ -13,11 +13,11 @@ const SAVE_CONCEPTS_TOOL: Anthropic.Tool = {
     properties: {
       narrative: {
         type: 'string',
-        description: 'Brief tensions (single dish) or collection logic (menu collection) — 2–4 paragraphs',
+        description: 'Brief tensions — 1 paragraph max. Name each conflict and how you resolved it.',
       },
       recommendation: {
         type: 'string',
-        description: 'Single dish only: which concept to prototype and why (1–2 paragraphs)',
+        description: 'Which concept to prototype and why. 1–2 sentences.',
       },
       collection_name: {
         type: 'string',
@@ -33,32 +33,32 @@ const SAVE_CONCEPTS_TOOL: Anthropic.Tool = {
             breakdown: {
               type: 'object',
               properties: {
-                hero: { type: 'string' },
-                flavor_drivers: { type: 'array', items: { type: 'string' } },
-                textures: { type: 'array', items: { type: 'string' } },
-                key_contrast: { type: 'string' },
+                hero: { type: 'string', description: '1 short phrase — primary ingredient and technique.' },
+                flavor_drivers: { type: 'array', items: { type: 'string' }, description: '3 items max.' },
+                textures: { type: 'array', items: { type: 'string' }, description: '3 items max.' },
+                key_contrast: { type: 'string', description: '1 sentence.' },
               },
               required: ['hero', 'flavor_drivers', 'textures', 'key_contrast'],
             },
-            presentation: { type: 'string' },
+            presentation: { type: 'string', description: '2 sentences max. What the dish looks like on the plate and how it arrives.' },
             why_it_could_win: {
               type: 'object',
               properties: {
-                menu_gap: { type: 'string' },
-                emotional_trigger: { type: 'string' },
-                salted_olive: { type: 'string' },
+                menu_gap: { type: 'string', description: '1 sentence. Which specific gap this addresses.' },
+                emotional_trigger: { type: 'string', description: '1 sentence. What the guest feels.' },
+                salted_olive: { type: 'string', description: '1 sentence. Why this belongs at Salted Olive specifically.' },
               },
               required: ['menu_gap', 'emotional_trigger', 'salted_olive'],
             },
             feasibility: {
               type: 'object',
               properties: {
-                assets_leveraged: { type: 'array', items: { type: 'string' } },
-                watchouts: { type: 'array', items: { type: 'string' } },
+                assets_leveraged: { type: 'array', items: { type: 'string' }, description: '3 items max.' },
+                watchouts: { type: 'array', items: { type: 'string' }, description: '3 items max.' },
               },
               required: ['assets_leveraged', 'watchouts'],
             },
-            experiment_focus: { type: 'array', items: { type: 'string' } },
+            experiment_focus: { type: 'array', items: { type: 'string' }, description: '3 items max.' },
           },
           required: ['concept_name', 'one_line', 'why_it_could_win', 'experiment_focus'],
         },
@@ -68,7 +68,7 @@ const SAVE_CONCEPTS_TOOL: Anthropic.Tool = {
   },
 }
 
-function buildBriefMessage(brief: Record<string, unknown>): string {
+function buildBriefMessage(brief: Record<string, unknown>, recentConcepts: string[] = []): string {
   const lines: string[] = ['Here is a completed R&D Brief. Generate concepts now.\n']
 
   lines.push(`Brief Type: ${brief.brief_type === 'menu_collection' ? 'Menu Collection' : 'Single Dish'}`)
@@ -107,6 +107,10 @@ function buildBriefMessage(brief: Record<string, unknown>): string {
   lines.push(`\nExploration Mode: ${brief.exploration_mode ?? 'balanced'}`)
   lines.push(`Generation Mode: ${brief.generation_mode ?? 'full'}`)
 
+  if (recentConcepts.length > 0) {
+    lines.push(`\nRecently generated concepts (do not repeat these approaches, primary proteins, or pantry pairings):\n${recentConcepts.map(n => `- ${n}`).join('\n')}`)
+  }
+
   return lines.join('\n')
 }
 
@@ -129,20 +133,21 @@ export async function POST(req: NextRequest) {
     }
 
     const isFast = brief.generation_mode === 'fast'
-    // Full mode: 3 concepts with all fields + narrative + recommendation can hit 4000+
-    // giving 6000 headroom ensures we never truncate mid-tool-call
-    const maxTokens = isFast ? 2500 : 6000
+    const maxTokens = isFast ? 1200 : 2000
 
-    const userMessage = buildBriefMessage(brief)
-    const systemChars = SYSTEM_PROMPT.length
-    const userChars = userMessage.length
-    console.log('[generate-concepts] Payload:', {
+    const { data: recentRaw } = await supabase
+      .from('rd_concepts')
+      .select('concept_name')
+      .order('created_at', { ascending: false })
+      .limit(15)
+    const recentConcepts = (recentRaw ?? []).map((r) => r.concept_name)
+
+    const userMessage = buildBriefMessage(brief, recentConcepts)
+    const estInputTokens = Math.round(SYSTEM_PROMPT.length / 3) + Math.round(userMessage.length / 4)
+    console.log('[generate-concepts] Calling Claude', {
       mode: `${brief.brief_type} / ${brief.generation_mode}`,
-      maxTokens,
-      systemChars,
-      userChars,
-      totalChars: systemChars + userChars,
-      estInputTokens: Math.round((systemChars + userChars) / 4),
+      estInputTokens,
+      maxOutputTokens: maxTokens,
     })
     const t0 = Date.now()
 
@@ -161,11 +166,12 @@ export async function POST(req: NextRequest) {
       messages: [{ role: 'user', content: userMessage }],
     })
 
-    console.log(`[generate-concepts] Claude responded in ${Date.now() - t0}ms`, {
+    const cacheRead = (message.usage as unknown as { cache_read_input_tokens?: number }).cache_read_input_tokens ?? 0
+    console.log(`[generate-concepts] Done in ${Date.now() - t0}ms`, {
       stop_reason: message.stop_reason,
-      input_tokens: message.usage.input_tokens,
+      input_tokens: message.usage.input_tokens + cacheRead,
       output_tokens: message.usage.output_tokens,
-      cache_read_tokens: (message.usage as unknown as { cache_read_input_tokens?: number }).cache_read_input_tokens ?? 0,
+      cache_hit: cacheRead > 0,
     })
 
     if (message.stop_reason === 'max_tokens') {

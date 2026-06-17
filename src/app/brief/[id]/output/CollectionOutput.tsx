@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Sparkles, Bookmark, BookmarkCheck } from 'lucide-react'
+import { Sparkles, Bookmark } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { SectionCard } from '@/components/ui/section-card'
 import { Pill } from '@/components/ui/pill'
@@ -59,7 +59,7 @@ function DishConceptCard({
     <div className="bg-white border border-olive/15 rounded-xl overflow-hidden">
       {/* Header */}
       <div className="px-5 pt-5 pb-4">
-        <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex items-start justify-between gap-3 mb-2">
           <div className="flex items-center gap-2 flex-wrap">
             {isSetMenu && (
               <span className="text-[9px] uppercase tracking-[1.5px] text-ink-muted border border-olive/20 rounded px-1.5 py-0.5">
@@ -69,76 +69,81 @@ function DishConceptCard({
             <Pill variant="faint">{slot.category}</Pill>
           </div>
           {!concept && !loading && (
-            <button onClick={onGenerate} className={cn(ghostBtnCls, 'shrink-0 flex items-center gap-1.5 text-[11px]')}>
-              <Sparkles size={11} />
-              Generate full concept
+            <button onClick={onGenerate} className={cn(ghostBtnCls, 'shrink-0 flex items-center gap-1.5')}>
+              <Sparkles size={13} />
+              Generate
             </button>
           )}
           {loading && (
-            <span className="flex items-center gap-1.5 text-[11px] text-ink-muted">
-              <Sparkles size={11} className="animate-spin" />
+            <span className="flex items-center gap-1.5 text-[12px] text-ink-muted">
+              <Sparkles size={13} className="animate-spin" />
               Generating…
             </span>
           )}
+          {concept && (
+            <button
+              onClick={onSave}
+              disabled={saved}
+              className={cn(ghostBtnCls, 'shrink-0 flex items-center gap-1.5 disabled:opacity-50')}
+            >
+              <Bookmark size={13} className={saved ? 'fill-olive' : ''} />
+              {saved ? 'Saved' : 'Save to menu items'}
+            </button>
+          )}
         </div>
 
-        <h3 className="font-serif text-[18px] font-normal text-ink leading-snug mb-1">
+        <h3 className="font-serif text-[22px] font-normal text-ink leading-snug mb-1">
           {concept?.concept_name ?? slot.concept_name}
         </h3>
-        <p className="text-sm text-ink-mid font-light leading-relaxed">
+        <p className="text-sm text-ink-mid font-light leading-relaxed italic">
           {concept?.one_line ?? slot.one_line}
         </p>
       </div>
 
       {/* Full concept — shown only after generation */}
       {concept && (
-        <div className="border-t border-olive/10 px-5 py-4 space-y-4 bg-paper/40">
-          {/* Breakdown */}
+        <>
+          {/* Breakdown 2×2 grid */}
           {concept.breakdown && (
-            <div>
-              <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-2">Breakdown</p>
-              <div className="space-y-1.5">
-                <div className="flex gap-3 text-[12px]">
-                  <span className="text-ink-muted font-light w-24 shrink-0">Hero</span>
-                  <span className="text-ink font-light">{concept.breakdown.hero}</span>
-                </div>
-                <div className="flex gap-3 text-[12px]">
-                  <span className="text-ink-muted font-light w-24 shrink-0">Flavours</span>
-                  <span className="text-ink font-light">{concept.breakdown.flavor_drivers.join(', ')}</span>
-                </div>
-                <div className="flex gap-3 text-[12px]">
-                  <span className="text-ink-muted font-light w-24 shrink-0">Textures</span>
-                  <span className="text-ink font-light">{concept.breakdown.textures.join(', ')}</span>
-                </div>
-                <div className="flex gap-3 text-[12px]">
-                  <span className="text-ink-muted font-light w-24 shrink-0">Key contrast</span>
-                  <span className="text-ink font-light">{concept.breakdown.key_contrast}</span>
-                </div>
+            <div className="px-5 py-4 border-t border-olive/10">
+              <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-3">Concept Breakdown</p>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  ['Hero', concept.breakdown.hero],
+                  ['Key Flavor Drivers', concept.breakdown.flavor_drivers.join(' · ')],
+                  ['Key Textures', concept.breakdown.textures.join(' · ')],
+                  ['Key Contrast', concept.breakdown.key_contrast],
+                ] as [string, string][]).map(([label, value]) => (
+                  <div key={label} className="bg-cream-dark rounded-lg p-3">
+                    <p className="text-[10px] uppercase tracking-[1px] text-ink-muted mb-1.5">{label}</p>
+                    <p className="text-[12px] text-ink font-light leading-snug">{value}</p>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
           {/* Presentation */}
           {concept.presentation && (
-            <div>
-              <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-1.5">Presentation</p>
-              <p className="text-[12px] text-ink-mid font-light leading-relaxed">{concept.presentation}</p>
+            <div className="px-5 py-4 border-t border-olive/10">
+              <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-2">Presentation & Service Moment</p>
+              <p className="text-sm text-ink-mid font-light leading-relaxed">{concept.presentation}</p>
             </div>
           )}
 
           {/* Why it could win */}
           {concept.why_it_could_win && typeof concept.why_it_could_win === 'object' && (
-            <div>
-              <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-2">Why it could win</p>
-              <div className="space-y-1.5">
-                {[
-                  { label: 'Menu gap', value: concept.why_it_could_win.menu_gap },
-                  { label: 'Emotional trigger', value: concept.why_it_could_win.emotional_trigger },
-                  { label: 'Salted Olive', value: concept.why_it_could_win.salted_olive },
-                ].map(({ label, value }) => (
-                  <div key={label} className="flex gap-3 text-[12px]">
-                    <span className="text-ink-muted font-light w-24 shrink-0">{label}</span>
-                    <span className="text-ink font-light">{value}</span>
+            <div className="px-5 py-4 border-t border-olive/10">
+              <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-3">Why It Could Win</p>
+              <div className="divide-y divide-olive/10">
+                {([
+                  ['Menu Gap', concept.why_it_could_win.menu_gap],
+                  ['Emotional Trigger', concept.why_it_could_win.emotional_trigger],
+                  ['Salted Olive', concept.why_it_could_win.salted_olive],
+                ] as [string, string][]).map(([label, text]) => (
+                  <div key={label} className="grid grid-cols-[108px_1fr] gap-3 py-2.5 first:pt-0 last:pb-0">
+                    <span className="text-[10px] uppercase tracking-[1px] text-olive font-medium pt-0.5">{label}</span>
+                    <span className="text-[12px] text-ink-mid font-light leading-relaxed">{text}</span>
                   </div>
                 ))}
               </div>
@@ -146,53 +151,50 @@ function DishConceptCard({
           )}
 
           {/* Feasibility */}
-          {concept.feasibility && (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-1.5">Assets leveraged</p>
-                <ul className="space-y-0.5">
-                  {concept.feasibility.assets_leveraged.map((a) => (
-                    <li key={a} className="text-[12px] text-ink font-light">· {a}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-1.5">Watchouts</p>
-                <ul className="space-y-0.5">
-                  {concept.feasibility.watchouts.map((w) => (
-                    <li key={w} className="text-[12px] text-ink-mid font-light">· {w}</li>
-                  ))}
-                </ul>
+          {concept.feasibility && (concept.feasibility.assets_leveraged.length > 0 || concept.feasibility.watchouts.length > 0) && (
+            <div className="px-5 py-4 border-t border-olive/10">
+              <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-3">Feasibility Notes</p>
+              <div className="grid grid-cols-2 gap-5">
+                {concept.feasibility.assets_leveraged.length > 0 && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[1px] text-ink-muted pb-2 mb-2 border-b border-olive/10">Assets Leveraged</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {concept.feasibility.assets_leveraged.map((a) => <Pill key={a} variant="faint">{a}</Pill>)}
+                    </div>
+                  </div>
+                )}
+                {concept.feasibility.watchouts.length > 0 && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[1px] text-ink-muted pb-2 mb-2 border-b border-olive/10">Watchouts</p>
+                    <ul className="space-y-2">
+                      {concept.feasibility.watchouts.map((w, i) => (
+                        <li key={i} className="flex gap-2 text-[12px] text-ink-mid font-light leading-snug">
+                          <span className="w-1 h-1 rounded-full bg-ink-muted mt-1.5 shrink-0" />
+                          {w}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
           )}
 
           {/* Experiment focus */}
           {concept.experiment_focus?.length > 0 && (
-            <div>
-              <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-1.5">Experiment focus</p>
-              <ul className="space-y-0.5">
-                {concept.experiment_focus.map((f) => (
-                  <li key={f} className="text-[12px] text-ink font-light">· {f}</li>
+            <div className="px-5 py-4 border-t border-olive/10 bg-cream-dark">
+              <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-3">Experiment Focus</p>
+              <ul className="space-y-2.5">
+                {concept.experiment_focus.map((f, i) => (
+                  <li key={i} className="flex gap-2.5 items-start">
+                    <span className="w-3.5 h-3.5 rounded border border-olive/25 shrink-0 mt-0.5 bg-white" />
+                    <span className="text-[12px] text-ink-mid font-light leading-snug">{f}</span>
+                  </li>
                 ))}
               </ul>
             </div>
           )}
-
-          {/* Save */}
-          <div className="pt-2 flex justify-end border-t border-olive/10">
-            <button
-              onClick={onSave}
-              disabled={saved}
-              className={cn(ghostBtnCls, 'flex items-center gap-1.5 text-[11px]')}
-            >
-              {saved
-                ? <><BookmarkCheck size={12} className="text-olive" /> Saved to menu items</>
-                : <><Bookmark size={12} /> Save to menu items</>
-              }
-            </button>
-          </div>
-        </div>
+        </>
       )}
     </div>
   )

@@ -39,7 +39,7 @@ const sections = [
     items: [
       { href: '/brief', label: 'R&D Brief', icon: Lightbulb },
       { href: '/brief/history', label: 'Brief History', icon: Clock },
-      { href: '/saved/items', label: 'Saved Items', icon: Bookmark },
+      { href: '/saved/items', label: 'Saved Dishes', icon: Bookmark },
       { href: '/saved/collections', label: 'Saved Collections', icon: FolderOpen },
     ],
   },

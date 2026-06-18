@@ -29,8 +29,9 @@ export default async function BriefDetailPage({ params }: { params: Promise<{ id
 
   if (!brief) notFound()
 
+  const isCollection = brief.brief_type === 'menu_collection'
   const hasCollectionOverview =
-    brief.brief_type === 'menu_collection' &&
+    isCollection &&
     (brief.output_data as { type?: string } | null)?.type === 'collection'
   const hasOutput = (concepts && concepts.length > 0) || hasCollectionOverview
 
@@ -176,7 +177,7 @@ export default async function BriefDetailPage({ params }: { params: Promise<{ id
                 href={`/brief/${id}/output`}
                 className="text-[12px] text-olive font-medium hover:underline shrink-0"
               >
-                View Output →
+                {isCollection ? 'View Collection →' : 'View Dish →'}
               </Link>
             </div>
             <div className="pt-3">

@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { PageHeader } from '@/components/ui/page-header'
 import { StatusBadge } from '@/components/ui/status-badge'
-import { Pill } from '@/components/ui/pill'
 
 const STRATEGIC_ROLES = ['Revenue Driver', 'Margin Driver', 'Brand Driver', 'VIP Driver']
 
@@ -35,7 +34,6 @@ export default async function DashboardPage() {
     { count: recipeCount },
     { data: recentMenuItems },
     { data: recentConcepts },
-    { data: recentCollections },
     { data: recentBriefs },
   ] = await Promise.all([
     supabase
@@ -57,12 +55,7 @@ export default async function DashboardPage() {
       .select('id, concept_name, status, created_at')
       .in('status', ['saved', 'testing', 'active'])
       .order('created_at', { ascending: false })
-      .limit(4),
-    supabase
-      .from('saved_collections')
-      .select('id, name, brief_id, created_at')
-      .order('created_at', { ascending: false })
-      .limit(4),
+      .limit(5),
     supabase
       .from('rd_briefs')
       .select('id, brief_type, category, menu_theme, created_at')
@@ -105,24 +98,7 @@ export default async function DashboardPage() {
   }
 
   // --- Merge recent R&D items ---
-  type RDItem = { id: string; type: 'concept' | 'collection'; name: string; status?: string; created_at: string }
-  const rdItems: RDItem[] = [
-    ...(recentConcepts ?? []).map((c) => ({
-      id: c.id,
-      type: 'concept' as const,
-      name: c.concept_name,
-      status: c.status,
-      created_at: c.created_at,
-    })),
-    ...(recentCollections ?? []).map((c) => ({
-      id: c.id,
-      type: 'collection' as const,
-      name: c.name,
-      created_at: c.created_at,
-    })),
-  ]
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 5)
+  const savedConcepts = (recentConcepts ?? []).slice(0, 5)
 
   const totalActive = activeItems.length
   const maxRoleCount = Math.max(...Object.values(roleCounts), 1)
@@ -258,18 +234,16 @@ export default async function DashboardPage() {
           <div>
             <p className="text-[9px] uppercase tracking-[1.5px] text-ink-muted mb-2">R&D</p>
             <div className="space-y-1.5">
-              {rdItems.slice(0, 5).map((item) => (
+              {savedConcepts.length === 0 ? (
+                <p className="text-[10px] text-ink-muted/60 italic px-1">No saved concepts yet.</p>
+              ) : savedConcepts.map((c) => (
                 <Link
-                  key={`${item.type}-${item.id}`}
-                  href={item.type === 'concept' ? `/concepts/${item.id}` : `/saved/collections`}
+                  key={c.id}
+                  href={`/concepts/${c.id}`}
                   className="group flex items-center justify-between gap-2 bg-white border border-olive/15 rounded-lg px-3 py-2.5 hover:border-olive/40 transition-colors"
                 >
-                  <p className="text-[11px] text-ink font-light truncate">{item.name}</p>
-                  {item.status ? (
-                    <StatusBadge status={item.status} />
-                  ) : (
-                    <Pill variant="cream">Collection</Pill>
-                  )}
+                  <p className="text-[11px] text-ink font-light truncate">{c.concept_name}</p>
+                  <StatusBadge status={c.status} />
                 </Link>
               ))}
             </div>
@@ -291,7 +265,9 @@ export default async function DashboardPage() {
                     className="group flex items-center justify-between gap-2 bg-white border border-olive/15 rounded-lg px-3 py-2.5 hover:border-olive/40 transition-colors"
                   >
                     <p className="text-[11px] text-ink font-light truncate">{label}</p>
-                    <ChevronRight size={12} className="text-ink-muted shrink-0 group-hover:text-olive transition-colors" />
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap ${brief.brief_type === 'menu_collection' ? 'bg-cream-dark text-ink-mid' : 'bg-olive-faint text-olive'}`}>
+                      {brief.brief_type === 'menu_collection' ? 'Collection' : 'Dish'}
+                    </span>
                   </Link>
                 )
               })}

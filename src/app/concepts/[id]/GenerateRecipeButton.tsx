@@ -41,7 +41,7 @@ export function GenerateRecipeButton({ conceptId, onSuccess }: Props) {
       className={`flex items-center gap-2 ${primaryBtnCls}`}
     >
       <Sparkles size={14} />
-      {loading ? 'Generating…' : 'Generate Prototype Recipe'}
+      {loading ? 'Generating…' : 'Generate Recipe'}
     </button>
   )
 }

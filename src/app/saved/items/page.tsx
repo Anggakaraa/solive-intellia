@@ -38,7 +38,7 @@ export default async function SavedItemsPage() {
     <div className="max-w-2xl">
       <PageHeader
         eyebrow="Intelligence"
-        title="Saved Items"
+        title="Saved Dishes"
         subtitle="Dish concepts saved from R&D output — tracked through concept, recipe, and testing."
       />
 
@@ -64,7 +64,7 @@ export default async function SavedItemsPage() {
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <p className="font-serif text-[15px] text-ink">{concept.concept_name}</p>
+                    <p className="font-serif text-lg font-normal text-ink leading-snug">{concept.concept_name}</p>
                     <StatusBadge status={displayStatus} />
                   </div>
                   {concept.one_line && (
@@ -80,14 +80,6 @@ export default async function SavedItemsPage() {
         </div>
       )}
 
-      <div className="mt-8 pt-6 border-t border-olive/10">
-        <p className="text-[12px] text-ink-muted font-light mb-3">
-          Ready to develop another concept?
-        </p>
-        <Link href="/brief" className={ghostBtnCls}>
-          New R&D Brief →
-        </Link>
-      </div>
     </div>
   )
 }

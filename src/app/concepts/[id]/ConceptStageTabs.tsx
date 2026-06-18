@@ -82,7 +82,7 @@ export function ConceptStageTabs({
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'concept', label: 'Concept' },
-    ...(recipe ? [{ id: 'recipe' as Tab, label: `Recipe · V${recipe.version}` }] : []),
+    ...(recipe ? [{ id: 'recipe' as Tab, label: 'Recipe' }] : []),
   ]
 
   return (
@@ -94,10 +94,10 @@ export function ConceptStageTabs({
             key={tab.id}
             onClick={() => setActive(tab.id)}
             className={[
-              'pb-3 text-sm font-light transition-colors border-b-2 -mb-px',
+              'pb-3 text-sm transition-colors border-b-2 -mb-px',
               active === tab.id
-                ? 'text-ink border-olive'
-                : 'text-ink-muted border-transparent hover:text-ink',
+                ? 'text-ink border-olive font-semibold'
+                : 'text-ink-muted border-transparent font-light hover:text-ink',
             ].join(' ')}
           >
             {tab.label}
@@ -221,11 +221,7 @@ export function ConceptStageTabs({
 
           {/* Generate Recipe CTA */}
           {!recipe && (
-            <div className="border-t border-olive/15 pt-6 mt-3 flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-ink">Prototype Recipe</p>
-                <p className="text-[12px] text-ink-muted font-light">Not generated yet</p>
-              </div>
+            <div className="border-t border-olive/15 pt-4 mt-3 flex justify-end">
               <GenerateRecipeButton conceptId={concept.id} onSuccess={handleGenerateSuccess} />
             </div>
           )}

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/ui/page-header'
 import { ghostBtnCls } from '@/lib/styles'
 import { CollectionCard } from './CollectionCard'
+import type { CollectionOutputData } from '@/lib/supabase/types'
 
 export default async function SavedCollectionsPage() {
   const supabase = await createClient()
@@ -12,15 +13,18 @@ export default async function SavedCollectionsPage() {
     .select('*')
     .order('created_at', { ascending: false })
 
-  const collectionsWithConcepts = await Promise.all(
+  const collectionsWithDishes = await Promise.all(
     (collections ?? []).map(async (col) => {
-      if (!col.brief_id) return { ...col, concepts: [] }
-      const { data: concepts } = await supabase
-        .from('rd_concepts')
-        .select('concept_name, status')
-        .eq('brief_id', col.brief_id)
-        .order('created_at')
-      return { ...col, concepts: concepts ?? [] }
+      if (!col.brief_id) return { ...col, dishes: [], liveTitle: null }
+      const { data: brief } = await supabase
+        .from('rd_briefs')
+        .select('output_data, menu_theme')
+        .eq('id', col.brief_id)
+        .single()
+      const outputData = brief?.output_data as CollectionOutputData | null
+      const dishes = outputData?.type === 'collection' ? outputData.dishes : []
+      const liveTitle = outputData?.collection_name ?? brief?.menu_theme ?? null
+      return { ...col, dishes, liveTitle }
     })
   )
 
@@ -29,10 +33,10 @@ export default async function SavedCollectionsPage() {
       <PageHeader
         eyebrow="Intelligence"
         title="Saved Collections"
-        subtitle="Menu collections saved from R&D output. Dish concepts update live as you develop them."
+        subtitle="Menu collections saved from R&D output."
       />
 
-      {collectionsWithConcepts.length === 0 ? (
+      {collectionsWithDishes.length === 0 ? (
         <div className="text-center py-16 text-ink-muted border border-dashed border-olive/25 rounded-lg">
           <p className="text-sm font-light mb-4">No collections saved yet.</p>
           <Link href="/brief" className={ghostBtnCls}>
@@ -41,20 +45,12 @@ export default async function SavedCollectionsPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {collectionsWithConcepts.map((col) => (
+          {collectionsWithDishes.map((col) => (
             <CollectionCard key={col.id} col={col} />
           ))}
         </div>
       )}
 
-      <div className="mt-8 pt-6 border-t border-olive/10">
-        <p className="text-[12px] text-ink-muted font-light mb-3">
-          Want to develop a new menu collection?
-        </p>
-        <Link href="/brief" className={ghostBtnCls}>
-          New R&D Brief →
-        </Link>
-      </div>
     </div>
   )
 }

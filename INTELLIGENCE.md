@@ -16,22 +16,25 @@ This is not an intelligence platform yet. It is a concept generation tool. Every
 
 ### Overview
 
-A user submits an R&D Brief through a structured form. Clicking "Generate Concepts" calls the AI, which returns structured concept data saved directly to the database.
+A user fills an R&D Brief form and clicks "Generate Concept →" (dish) or "Generate Collection →" (collection). The CTA saves the brief and calls the generation API in one step — there is no separate "capture brief then generate" flow.
 
 ### Request Flow
 
 ```
-User clicks "Generate Concepts"
-  → POST /api/generate-concepts { briefId }
-  → Fetch rd_briefs WHERE id = briefId
-  → Build prompt (system prompt + brief message)
-  → Claude API call (tool use, claude-sonnet-4-6)
-  → Extract save_concepts tool call result
-  → Insert rows into rd_concepts
-  → Update rd_briefs.output_data (narrative, recommendation, collection_name)
-  → Return { success: true }
-  → Client redirects to /brief/[id]/output
+User clicks "Generate Concept →" / "Generate Collection →"
+  → BriefForm: POST to rd_briefs (insert) → get new briefId
+  → BriefForm: POST /api/generate-concepts (or /api/generate-collection) { briefId }
+  → API: Fetch rd_briefs WHERE id = briefId
+  → API: Build prompt (system prompt + brief message)
+  → API: Claude API call (tool use, claude-sonnet-4-6)
+  → API: Extract tool call result
+  → API: Insert rows into rd_concepts
+  → API: Update rd_briefs.output_data
+  → API: Return { success: true }
+  → BriefForm: router.push('/brief/[id]/output')
 ```
+
+Edit flow (existing briefs): CTA is "Save changes" — only updates the brief, does not trigger generation. Generation from an existing brief is triggered separately via the GenerateConceptButton on `/brief/[id]`.
 
 ### Prompt Architecture
 
@@ -42,13 +45,14 @@ The prompt is split into two parts:
 - Exploration mode behavior (Safe / Balanced / Exploratory)
 - Generation mode behavior (Full / Fast)
 - Thinking hierarchy (Level 1: Dish Principles → ... → Level 6: Pantry Knowledge)
-- Dish Principles (non-negotiable)
+- Dish Principles (non-negotiable) — 4 principles: Contemporary Eastern Mediterranean Hospitality, Accessible Formats, Craveability First, Operationally Realistic
 - Menu Principles (collective standards)
 - Strategic roles (Revenue / Margin / Brand / VIP Driver)
 - FF/FD matrix explanation
 - Active pantry assets (currently hardcoded — see Roadmap for planned migration)
 - Existing menu (currently hardcoded — see Roadmap for planned migration)
 - Key gaps (currently hardcoded — derived by LLM from menu data in future)
+- **Collection Character derivation block** (Layer 1 of collection generation): before writing any dish slot, AI answers "What kind of food belongs at this specific occasion — and what kind doesn't?" from the brief's occasion, tone, desired feeling, and guest context. Forces AI to derive a distinct dish pool for each brief rather than defaulting to a generic Salted Olive greatest-hits pool.
 - Menu collection behavior
 - Concept evaluation checklist
 - Behavioral guardrails
@@ -56,8 +60,10 @@ The prompt is split into two parts:
 
 **User Message** (built dynamically per request in `buildBriefMessage`)
 - Brief type (Single Dish / Menu Collection)
-- Category or menu theme
-- Menu composition (if collection)
+- Working title (dish) or menu theme (collection) — from `menu_theme` field
+- Category (dish briefs only)
+- Collection format (À la carte / Set Menu) — collection briefs only
+- Menu composition or "AI to recommend" — collection briefs only
 - Strategic roles
 - FF / FD scores
 - Pantry assets to feature
@@ -67,6 +73,7 @@ The prompt is split into two parts:
 - Constraints
 - Exploration mode
 - Generation mode
+- Recently generated concept names (anti-repetition signal — last 15 concepts across all briefs)
 
 ### Output Method
 
@@ -107,8 +114,8 @@ Controls how closely the AI adheres to existing menu and operational constraints
 | Mode | Behavior |
 |---|---|
 | **Safe** | Must use pantry assets. Strong preference for Base Recipes. Prioritises operational feasibility. Optimises for immediate deployment. |
-| **Balanced** (default) | Pantry-led when useful. Can stretch current territory. Balances practicality and novelty. |
-| **Exploratory** | Dish Principles still apply. Pantry-led is optional. Can propose future assets. Can challenge menu assumptions. Focus on breakthrough thinking. |
+| **Balanced** (default) | Can use pantry assets when useful but not required. Can stretch current territory. Balances practicality and novelty. |
+| **Exploratory** | Dish Principles still apply. Pantry assets optional. Can propose future assets. Can challenge menu assumptions. Focus on breakthrough thinking. |
 
 ### Generation Mode
 
@@ -165,11 +172,13 @@ Concepts move through these statuses:
 generated → saved → testing → active → archived
 ```
 
-- **generated**: AI output, not yet reviewed
-- **saved**: User clicked "Save to menu items" — worth developing
+- **generated**: AI output, not yet reviewed. Default state on creation.
+- **saved**: User clicked "Save to menu items" on the output page — worth developing. Appears in Saved Items.
 - **testing**: In kitchen or guest testing
 - **active**: On the menu
 - **archived**: Dropped
+
+The overview dashboard R&D Pipeline widget counts concepts by status across all briefs.
 
 ---
 
@@ -177,9 +186,11 @@ generated → saved → testing → active → archived
 
 | File | Purpose |
 |---|---|
-| `021_concept_pipeline.sql` | Updates status constraints, adds saved_collections tables, migrates legacy statuses |
-| `022_brief_output_data.sql` | Adds `output_data jsonb` column to rd_briefs |
-| `023_brief_modes.sql` | Adds `exploration_mode` and `generation_mode` columns to rd_briefs |
+| `021_concept_pipeline.sql` | Updates concept status constraints, adds `saved_collections` + `saved_collection_concepts` tables, migrates legacy statuses |
+| `022_brief_output_data.sql` | Adds `output_data jsonb` column to `rd_briefs` |
+| `023_brief_modes.sql` | Adds `exploration_mode` and `generation_mode` columns to `rd_briefs` |
+| `024_collection_format.sql` | Adds `collection_format` column to `rd_briefs` (`a_la_carte` \| `set_menu`) |
+| `025_dish_principles_remove_pantry_led.sql` | Removes Pantry-Led from Level 1 Dish Principles; re-seeds 4 updated principles |
 
 All migrations must be run manually in the Supabase SQL editor in order.
 

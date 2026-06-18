@@ -89,7 +89,7 @@ The Salted Olive design philosophy, structured across three levels. These are us
 | `notes` | text | Edge cases, caveats |
 
 **Three levels:**
-- **Level 1 — Dish Principles** (5): Applied to every individual dish. Mediterranean First, Bistro Format, Pantry-Led, Comfort Over Cleverness, Operationally Realistic.
+- **Level 1 — Dish Principles** (4): Applied to every individual dish. Contemporary Eastern Mediterranean Hospitality, Accessible Formats, Craveability First, Operationally Realistic. *(Pantry-Led was removed in migration 025 — the AI system is designed to think beyond pantry constraints, not within them.)*
 - **Level 2 — Menu Principles** (5): Applied to the menu as a whole — balance, shareability, pantry exposure, familiarity vs. discovery tension.
 - **Level 3 — Pantry Strategy** (3): How to build and extend the pantry product ecosystem.
 
@@ -139,7 +139,12 @@ The intent layer of the intelligence system. Each brief captures a strategic dir
 | Field | Type | Notes |
 |---|---|---|
 | `id` | uuid | Primary key |
-| `category` | text | Target menu category |
+| `brief_type` | text | `dish` \| `menu_collection` |
+| `category` | text | Target menu category (dish briefs only) |
+| `menu_theme` | text | Working title for dish briefs; theme for menu collections |
+| `collection_format` | text | `a_la_carte` \| `set_menu` (menu collection only; default `a_la_carte`) |
+| `menu_composition` | jsonb | `{ "Dips": 2, "Large Plates": 3, … }` — dish count per category |
+| `ai_recommend_composition` | boolean | If true, AI determines composition |
 | `strategic_roles` | text[] | Target strategic roles (names from `strategic_roles`) |
 | `format_familiarity` | int (1–5) | Target FF position |
 | `flavor_discovery` | int (1–5) | Target FD position |
@@ -148,6 +153,9 @@ The intent layer of the intelligence system. Each brief captures a strategic dir
 | `creative_references` | text | Directional references (dishes, places, moods) |
 | `desired_feeling` | text | Emotional outcome for the guest |
 | `constraints` | text | What to avoid or work within |
+| `exploration_mode` | text | `safe` \| `balanced` \| `exploratory` (default `balanced`) |
+| `generation_mode` | text | `full` \| `fast` (default `full`) |
+| `output_data` | jsonb | Written by API after generation. Dish: `{ narrative, recommendation }`. Collection: `{ type: 'collection', collection_name, narrative, … }` |
 
 ---
 
@@ -166,7 +174,7 @@ The intellectual property layer. The primary artifact produced by the intelligen
 | `why_it_could_win` | text | Strategic and emotional case for the concept |
 | `feasibility` | jsonb | `{ assets_leveraged: [], watchouts: [] }` |
 | `experiment_focus` | text[] | The 2–4 assumptions that determine success |
-| `status` | text | `draft` → `saved` → `recipe_generated` → `kitchen_tested` → `validated` |
+| `status` | text | `generated` → `saved` → `testing` → `active` → `archived` |
 
 ---
 
@@ -187,6 +195,33 @@ The execution layer. Prototype recipes derived from a concept. A concept can pro
 | `success_criteria` | text[] | Copied from `experiment_focus` at generation time |
 | `test_kitchen_notes` | text | Human-entered after prototyping — the longitudinal record |
 | `status` | text | `draft` → `tested` → `revised` → `approved` |
+
+---
+
+### `saved_collections`
+
+A user-saved snapshot of a menu collection. Created when the user clicks "Save Collection" on the output page of a `menu_collection` brief.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | uuid | Primary key |
+| `brief_id` | uuid | FK → `rd_briefs.id` |
+| `name` | text | Collection name (from AI output or user-edited) |
+| `menu_theme` | text | Copied from `rd_briefs.menu_theme` at save time |
+| `created_at` | timestamptz | |
+
+---
+
+### `saved_collection_concepts`
+
+Junction table linking a saved collection to its individual dish concepts. Supports wave-based ordering for set menus.
+
+| Field | Type | Notes |
+|---|---|---|
+| `collection_id` | uuid | FK → `saved_collections.id` (cascade delete) |
+| `concept_id` | uuid | FK → `rd_concepts.id` (cascade delete) |
+| `wave` | integer | Course/wave number (set menus) |
+| `wave_order` | integer | Position within a wave |
 
 ---
 
@@ -292,7 +327,7 @@ The data as structured enables the following AI-assisted queries and reasoning:
 |---|---|
 | Menu items (active) | 22 |
 | Pantry items | 6 |
-| Identity principles | 13 (5 × L1, 5 × L2, 3 × L3) |
+| Identity principles | 12 (4 × L1, 5 × L2, 3 × L3) |
 | Strategic roles | 4 (Revenue, Margin, Brand, VIP) |
 | Menu categories | 7 |
 | Flavor identities | 16 (shared across menu and pantry) |

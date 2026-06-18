@@ -85,164 +85,118 @@ Two typefaces — use them intentionally:
 
 ## Component Inventory
 
-### Status: ✅ Exists in `src/components/`  |  ⚠️ Needs extraction from page files  |  ❌ Does not exist
+### Status: ✅ Exists in `src/components/`  |  ❌ Does not exist
 
 ---
 
-### 1. `BackLink` ✅ — Pattern (not yet extracted)
+### 1. `BackLink` ✅ — `src/components/ui/back-link.tsx`
 
 Back navigation. Used at the top of every detail and edit page.
 
-**Current pattern (repeated in 8+ files — should be extracted):**
-```tsx
-<Link
-  href="/brief/history"
-  className="flex items-center gap-1 text-[13px] text-ink-muted hover:text-ink mb-6 transition-colors"
->
-  <ChevronLeft size={14} /> Brief History
-</Link>
-```
-
-**Extract to:** `src/components/ui/back-link.tsx`
 ```tsx
 <BackLink href="/brief/history" label="Brief History" />
 ```
 
 ---
 
-### 2. `PageHeader` ⚠️ — Pattern (not extracted)
+### 2. `PageHeader` ✅ — `src/components/ui/page-header.tsx`
 
-Every page has the same header block: eyebrow label → serif H1 → optional subtitle.
+Every page has the same header block: eyebrow label → serif H1 → optional subtitle + optional right-side actions.
 
-**Current pattern:**
-```tsx
-<div className="mb-9">
-  <p className="text-[10px] uppercase tracking-[2px] text-ink-muted mb-1.5">Intelligence</p>
-  <h1 className="font-serif text-3xl font-normal text-ink tracking-tight leading-tight">
-    R&D Brief
-  </h1>
-  <p className="text-sm text-ink-mid font-light mt-1.5">
-    Articulate a concept direction.
-  </p>
-</div>
-```
-
-**Extract to:** `src/components/ui/page-header.tsx`
 ```tsx
 <PageHeader
   eyebrow="Intelligence"
   title="R&D Brief"
   subtitle="Articulate a concept direction."
-  actions={<EditDeleteRow />}  // optional
+  actions={<>
+    <Link href=".../edit" className={mutedBtnCls}>Edit</Link>
+    <DeleteButton ... />
+  </>}
 />
 ```
 
 ---
 
-### 3. `SectionCard` ⚠️ — Pattern (not extracted)
+### 3. `SectionCard` ✅ — `src/components/ui/section-card.tsx`
 
-White bordered card with an optional micro label at top. Used throughout detail pages.
+White bordered card with an optional micro label at top. Supports a `variant="muted"` prop for cream-dark background.
 
-**Current pattern (defined locally in concept page, recipe page, brief detail):**
-```tsx
-<div className="bg-white border border-olive/15 rounded-lg p-5">
-  <p className="text-[10px] uppercase tracking-[1.5px] text-ink-muted mb-3">{label}</p>
-  {children}
-</div>
-```
-
-**Extract to:** `src/components/ui/section-card.tsx`
 ```tsx
 <SectionCard label="Concept Breakdown">
+  {children}
+</SectionCard>
+
+<SectionCard variant="muted" label="Brief Tensions" className="mb-6">
   {children}
 </SectionCard>
 ```
 
 ---
 
-### 4. `SectionLabel` ⚠️ — Pattern (not extracted)
+### 4. `SectionLabel` ✅ — `src/components/ui/section-label.tsx`
 
-Horizontal divider with centered micro label. Used in forms to separate context from brief sections.
+Micro-label divider. Used in forms to separate sections.
 
-**Current pattern (defined in `brief-form.tsx` and `brief/[id]/page.tsx`):**
 ```tsx
-<div className="flex items-center gap-3 mb-6">
-  <div className="h-px flex-1 bg-olive/15" />
-  <p className="text-[10px] uppercase tracking-[2px] text-ink-muted shrink-0">{label}</p>
-  <div className="h-px flex-1 bg-olive/15" />
-</div>
-```
-
-**Extract to:** `src/components/ui/section-label.tsx`
-```tsx
-<SectionLabel label="The Brief" icon={<Sparkles />} />  // icon optional
+<SectionLabel label="The Brief" className="mb-6" />
 ```
 
 ---
 
-### 5. `Field` ⚠️ — Pattern (not extracted)
+### 5. `Field` ✅ — `src/components/forms/field.tsx`
 
-Form field wrapper: label + optional helper text + input slot. Defined separately in `BriefForm`, `ConceptEditForm`, `RecipeEditForm`.
+Form field wrapper: label + optional helper text + input slot.
 
-**Current pattern:**
-```tsx
-<div className="flex flex-col gap-1.5">
-  <label className="text-[13px] font-medium text-ink">{label}</label>
-  {helper && <p className="text-[11px] text-ink-muted">{helper}</p>}
-  {children}
-</div>
-```
-
-**Extract to:** `src/components/forms/field.tsx`
 ```tsx
 <Field label="Concept Name" helper="Working title — internal use only">
-  <Input ... />
+  <input className={inputCls} ... />
 </Field>
 ```
 
 ---
 
-### 6. `Pill` ⚠️ — Pattern (not extracted)
+### 6. `Pill` ✅ — `src/components/ui/pill.tsx`
 
-Rounded tag/badge. Three variants used across brief, concept, and pantry pages. Currently defined locally in 4+ files.
+Rounded tag/badge. Four variants.
 
-**Variants:**
+| Variant | Usage |
+|---|---|
+| `olive` | Selected/active category, primary tags |
+| `cream` | Secondary tags (textures, pantry assets) |
+| `default` | Neutral tags (flavor drivers, roles) |
+| `faint` | Subtle selected state in multi-selects |
 
-| Variant | Classes | Usage |
-|---|---|---|
-| `olive` | `bg-olive text-cream border-olive` | Selected/active category, selected state |
-| `cream` | `bg-cream-dark text-ink-mid border-transparent` | Secondary tags (textures, pantry assets) |
-| `default` | `bg-white text-ink-mid border-olive/20` | Neutral tags (flavor drivers, roles) |
-| `faint` | `bg-olive-faint text-olive border-olive/20` | Subtle selected state in multi-selects |
-
-**Extract to:** `src/components/ui/pill.tsx`
 ```tsx
 <Pill variant="olive">Veggies</Pill>
 <Pill variant="cream">Charred & tender</Pill>
 <Pill variant="default">House Labneh</Pill>
+<Pill variant="faint">Fast</Pill>
 ```
 
 ---
 
-### 7. `StatusBadge` ⚠️ — Pattern (not extracted)
+### 7. `StatusBadge` ✅ — `src/components/ui/status-badge.tsx`
 
-Lifecycle status indicator. Currently defined inside `brief/[id]/page.tsx`.
+Lifecycle status indicator. All status → colour mappings live here — never hardcode in pages.
 
-**Status values and styles:**
+**Current status values:**
 
-| Status | Style | Entities |
+| Status | Style | Used by |
 |---|---|---|
-| `draft` | `bg-cream-dark text-ink-muted` | Concepts, Recipes |
-| `saved` | `bg-olive-faint text-olive` | Concepts |
-| `recipe_generated` | `bg-olive-faint text-olive` | Concepts |
-| `kitchen_tested` | `bg-[#EAF3DE] text-[#3B6D11]` | Concepts, Recipes |
-| `validated` | `bg-[#EAF3DE] text-[#3B6D11]` | Concepts |
-| `tested` | `bg-[#EAF3DE] text-[#3B6D11]` | Recipes |
-| `approved` | `bg-[#EAF3DE] text-[#3B6D11]` | Recipes |
+| `generated` | cream-dark / ink-muted | Concepts |
+| `saved` | olive-faint / olive | Concepts |
+| `testing` | green / dark-green | Concepts |
+| `archived` | warm-grey | Concepts |
+| `tested` / `approved` | green / dark-green | Recipes |
+| `revised` | amber | Recipes |
+| `active` | green / dark-green | Menu items, Pantry items |
+| `concept` | amber | Menu items |
+| `inspiration` | purple-tint | Menu items |
+| `inactive` | warm-grey | Menu items, Pantry items |
 
-**Extract to:** `src/components/ui/status-badge.tsx`
 ```tsx
-<StatusBadge status="kitchen_tested" />
+<StatusBadge status="saved" />
+<StatusBadge status="active" />
 ```
 
 ---
@@ -259,26 +213,29 @@ Shows "Delete" → click → "Are you sure? Confirm / Cancel" → deletes → re
 
 ---
 
-### 9. `Input` ✅ — `src/components/ui/input.tsx` (shadcn — needs styling fix)
+### 9. `Input` ✅ — use `inputCls` from `src/lib/styles.ts`
 
-**Current issue:** The shadcn `Input` uses generic `border-input`, `focus-visible:border-ring` tokens which don't resolve to Salted Olive colors. As a result, all page files bypass it and use a raw `<input>` with a manually defined `inputCls` string.
+The shadcn `Input` component is not used directly — it doesn't resolve to Salted Olive tokens. Always use a raw `<input>` with `inputCls` imported from `src/lib/styles.ts`.
 
-**The correct fix:** Override the input with Salted Olive classes:
 ```tsx
-// Usage pattern until Input is fixed:
-const inputCls = 'w-full bg-white border border-olive/20 rounded-md text-sm text-ink font-light px-3 py-2 placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-olive focus:border-olive'
+import { inputCls } from '@/lib/styles'
+
+<input className={inputCls} type="text" ... />
 ```
-This constant is defined in 3 separate files. Should either fix `Input` component or centralize the class string in `src/lib/styles.ts`.
 
 ---
 
-### 10. `Textarea` ✅ — `src/components/ui/textarea.tsx` (shadcn — used with overrides)
+### 10. `Textarea` ✅ — use `textareaCls` from `src/lib/styles.ts`
 
-Same issue as `Input` — used with `className={textareaCls}` override in every file. The override string is:
+Same pattern as Input. Always use the shadcn `<Textarea>` component with `textareaCls` override.
+
 ```tsx
-const textareaCls = 'bg-white border-olive/20 rounded-md text-sm text-ink font-light placeholder:text-ink-muted focus-visible:ring-olive focus-visible:border-olive resize-none'
+import { Textarea } from '@/components/ui/textarea'
+import { textareaCls } from '@/lib/styles'
+import { cn } from '@/lib/utils'
+
+<Textarea className={cn(textareaCls, 'text-[12px] italic')} rows={5} ... />
 ```
-Defined in 3+ files. Centralize.
 
 ---
 
@@ -313,11 +270,10 @@ Multi-select pill input. Used in brief form for strategic roles and pantry asset
 
 ---
 
-### 13. `PillSelect` ⚠️ — Defined locally in `brief-form.tsx`
+### 13. `PillSelect` ✅ — `src/components/forms/pill-select.tsx`
 
-Single-select pill group. Currently defined as a local component inside `brief-form.tsx`. Nearly identical to `MultiSelect` but single-value.
+Single-select pill group. Nearly identical to `MultiSelect` but single-value.
 
-**Extract to:** `src/components/forms/pill-select.tsx`
 ```tsx
 <PillSelect
   options={categoryOptions}
@@ -325,6 +281,44 @@ Single-select pill group. Currently defined as a local component inside `brief-f
   onChange={(v) => set('category', v)}
 />
 ```
+
+---
+
+### 14. `ConceptCard` ✅ — `src/components/ui/concept-card.tsx`
+
+Full concept display card. Used on the output page (both tabbed single-dish and stacked collection views) and the saved concept detail page. Handles its own save-to-saved-items action via inline Supabase call.
+
+```tsx
+<ConceptCard
+  concept={concept}          // ConceptCardData
+  ff={brief.format_familiarity}
+  fd={brief.flavor_discovery}
+  strategicRoles={brief.strategic_roles ?? []}
+  isSaved={concept.status === 'saved'}
+  onSave={(id) => { /* optional callback */ }}
+/>
+```
+
+`ConceptCardData` type is exported from the same file.
+
+---
+
+### 15. `ConceptTabs` ✅ — `src/components/ui/concept-tabs.tsx`
+
+Tabbed view for single-dish briefs. Renders one `ConceptCard` at a time with a tab bar across the top. Tracks saved state locally — saving concept A then switching to B will not falsely mark B as saved.
+
+```tsx
+<ConceptTabs
+  concepts={concepts}          // ConceptCardData[]
+  ff={brief.format_familiarity}
+  fd={brief.flavor_discovery}
+  strategicRoles={brief.strategic_roles ?? []}
+  recommendation="Prototype the Lamb Fatteh first…"   // optional strip at bottom
+  savedIds={concepts.filter(c => c.status === 'saved').map(c => c.id)}
+/>
+```
+
+The first tab is always labeled "Recommended". Concepts are passed newest-first from the server (ordered by `created_at DESC`).
 
 ---
 
@@ -453,20 +447,6 @@ Used on pages where content is AI-generated placeholder, not real output.
 
 | Issue | Priority | File(s) |
 |---|---|---|
-| `inputCls` string defined in 3 files | High | `ConceptEditForm`, `RecipeEditForm`, brief form |
-| `textareaCls` string defined in 3 files | High | Same files |
-| `Field` component defined locally in 3 files | High | Same files |
-| `Pill` defined locally in 4 files | High | `brief/[id]/page`, concept page, brief form |
-| `SectionCard` defined locally in 2 files | Medium | Concept page, recipe page |
-| `BackLink` repeated as raw JSX in 8+ files | Medium | All detail/edit pages |
-| `PageHeader` repeated as raw JSX in all pages | Medium | All pages |
-| `StatusBadge` defined locally | Medium | `brief/[id]/page` |
-| `PillSelect` defined locally | Medium | `brief-form.tsx` |
-| shadcn `Button` and `Input` not using Salted Olive tokens | Low | `src/components/ui/` |
+| shadcn `Button` component not using Salted Olive tokens | Low | `src/components/ui/button.tsx` |
 
-**Resolution order:**
-1. Centralize `inputCls` + `textareaCls` into `src/lib/styles.ts`
-2. Extract `Field`, `Pill`, `StatusBadge` — highest reuse
-3. Extract `BackLink`, `PageHeader`, `SectionCard` — structural patterns
-4. Extract `PillSelect` — moves it closer to `MultiSelect`
-5. Align `Button` + `Input` to Salted Olive tokens — last, lowest risk
+All previously tracked tech debt (local `inputCls`/`textareaCls` duplication, local Field/Pill/StatusBadge/PillSelect definitions, BackLink/PageHeader/SectionCard inline patterns) has been resolved. Classes are centralized in `src/lib/styles.ts` and all shared components are extracted to `src/components/`.

@@ -53,6 +53,12 @@ export async function buildCatalogueContext(supabase: SupabaseClient): Promise<C
       .select('menu_item_id, pantry_items(name)'),
   ])
 
+  console.log('[catalogue-context] Fetched from Supabase:', {
+    pantryItems: (pantryItems ?? []).length,
+    menuItems: (menuItems ?? []).filter(m => m.category !== 'Base Recipes').length,
+    baseRecipes: (menuItems ?? []).filter(m => m.category === 'Base Recipes').length,
+  })
+
   // ── Pantry section ──────────────────────────────────────────────
   const pantryLines = (pantryItems ?? [] as PantryItem[]).map((p) => {
     const flavors = (p.flavor_contributions ?? []).join(', ')

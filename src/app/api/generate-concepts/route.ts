@@ -70,7 +70,15 @@ const SAVE_CONCEPTS_TOOL: Anthropic.Tool = {
 }
 
 function buildBriefMessage(brief: Record<string, unknown>, recentConcepts: string[] = []): string {
-  const lines: string[] = ['Here is a completed R&D Brief. Generate concepts now.\n']
+  const explorationMode = (brief.exploration_mode as string) ?? 'balanced'
+  const generationMode = (brief.generation_mode as string) ?? 'full'
+
+  const lines: string[] = [
+    `Exploration Mode: ${explorationMode}`,
+    `Generation Mode: ${generationMode}`,
+    '',
+    'Here is a completed R&D Brief. Generate concepts now.\n',
+  ]
 
   lines.push(`Brief Type: ${brief.brief_type === 'menu_collection' ? 'Menu Collection' : 'Single Dish'}`)
 
@@ -105,9 +113,6 @@ function buildBriefMessage(brief: Record<string, unknown>, recentConcepts: strin
   if (brief.creative_references) lines.push(`\nCreative References:\n${brief.creative_references}`)
   if (brief.desired_feeling) lines.push(`\nDesired Guest Feeling:\n${brief.desired_feeling}`)
   if (brief.constraints) lines.push(`\nConstraints:\n${brief.constraints}`)
-
-  lines.push(`\nExploration Mode: ${brief.exploration_mode ?? 'balanced'}`)
-  lines.push(`Generation Mode: ${brief.generation_mode ?? 'full'}`)
 
   if (recentConcepts.length > 0) {
     lines.push(`\nRecently generated concepts (do not repeat these approaches, primary proteins, or pantry pairings):\n${recentConcepts.map(n => `- ${n}`).join('\n')}`)

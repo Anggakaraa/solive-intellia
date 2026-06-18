@@ -61,6 +61,8 @@ const SAVE_COLLECTION_OVERVIEW_TOOL: Anthropic.Tool = {
 function buildCollectionMessage(brief: Record<string, unknown>, recentConcepts: string[] = []): string {
   const isSetMenu = brief.collection_format === 'set_menu'
   const lines: string[] = [
+    `Exploration Mode: ${(brief.exploration_mode as string) ?? 'balanced'}`,
+    '',
     `Generate a collection overview for this Menu Collection brief.\n`,
     `Collection Format: ${isSetMenu ? 'Set / tasting menu' : 'À la carte collection'}`,
   ]
@@ -87,8 +89,6 @@ function buildCollectionMessage(brief: Record<string, unknown>, recentConcepts: 
   if (brief.creative_references) lines.push(`\nCreative References:\n${brief.creative_references}`)
   if (brief.desired_feeling) lines.push(`\nDesired Guest Feeling:\n${brief.desired_feeling}`)
   if (brief.constraints) lines.push(`\nConstraints:\n${brief.constraints}`)
-
-  lines.push(`\nExploration Mode: ${brief.exploration_mode ?? 'balanced'}`)
 
   if (isSetMenu) {
     lines.push('\nThis is a set / tasting menu. Design a wave structure (typically 3–4 waves) with a clear progression arc — light to rich, discovery building. Include wave feel, categories, and dish count. Dishes must reference their wave number and position.')

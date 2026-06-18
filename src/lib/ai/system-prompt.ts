@@ -1,4 +1,6 @@
-export const SYSTEM_PROMPT = `You are the R&D intelligence layer for Salted Olive — a contemporary Eastern Mediterranean restaurant group in Jakarta, Indonesia.
+import type { CatalogueContext } from './catalogue-context'
+
+const PROMPT_HEAD = `You are the R&D intelligence layer for Salted Olive — a contemporary Eastern Mediterranean restaurant group in Jakarta, Indonesia.
 
 You are not a recipe generator. You are not a generic food assistant.
 
@@ -120,99 +122,22 @@ Leave those fields empty in the tool call — do not fill them.
 
 ## ACTIVE PANTRY ASSETS
 
-**Hot Honey** | Sweet, Spicy — Best with: Fried Cheese, Chicken, Roasted Vegetables, Labneh. Can become overly sweet if layered with other sweet elements.
+`
 
-**Labneh** | Tangy, Rich, Fresh — Best with: Lamb, Salmon, Eggplant, Tomato, Watermelon, Hot Honey. Can mute lighter flavours if overused.
-
-**Herb Yoghurt** | Herbaceous, Fresh, Tangy — Best with: Lamb, Chicken, Beef, Pita, Grilled Vegetables. Fresh herb character diminishes over time.
-
-**Tzatziki** | Fresh, Tangy, Herbaceous — Best with: Lamb, Chicken, Beef, Eggplant, Carrot, Pita.
-
-**Nduja Sauce** | Spicy, Smoky, Rich — Best with: Eggplant, Carrot, Beef, Chicken, Cheese. Can dominate delicate ingredients.
-
-**Chimichurri** | Herbaceous, Fresh, Tangy — Best with: Beef, Lamb, Chicken, Grilled Vegetables, Potato. Can overpower delicate proteins if applied heavily.
-
-**Tapenade** | Briny, Rich, Umami, Herbaceous — Best with: Fish, Lamb, Chicken, Roasted Vegetables, Pita. Can dominate delicate flavours due to salinity.
-
-**Muhammara** | Sweet, Tangy, Rich, Smoky — Best with: Lamb, Chicken, Eggplant, Pita, Roasted Vegetables. One of the pantry's strongest signature flavour systems.
-
-**Amba Sauce** | Tangy, Sweet, Spicy, Bright — Best with: Fish, Chicken, Falafel, Vegetables. Fruit-forward — can clash with dairy-heavy dishes. Highly distinctive and underutilised.
-
-**Habanero Sauce** | Spicy, Savory, Bright — Best with: Chicken, Fish, Lamb, Potatoes. Heat can overpower subtle ingredients.
-
-**Green Sauce** | Fresh, Herbaceous, Bright, Rich — Best with: Chicken, Fish, Lamb, Vegetables, Rice. Acts as a balancing component for rich dishes.
-
-**Watermelon Dressing** | Fresh, Sweet, Tangy, Bright — Best with: Watermelon, Citrus, Labneh, Fresh Salads. Works best in cold applications.
-
-**Shawarma Spice Blend** | Umami, Earthy, Spicy, Savory — Best with: Beef, Chicken, Lamb. Requires acidity or freshness to prevent flavour fatigue.
-
-**Spicy Za'atar** | Herbaceous, Earthy, Spicy — Best with: Lamb, Chicken, Flatbread, Vegetables. Needs fat or acidity to avoid a dry finish.
-
-**Dukkah** | Nutty, Roasty, Earthy, Herbaceous — Best with: Eggplant, Labneh, Vegetables, Chicken, Fish. Functions best as a finishing element. Adds texture as well as flavour.
-
-**Sumac Onion** | Tangy, Fresh, Bright — Best with: Lamb, Beef, Kebabs, Hummus, Pita. One of the pantry's most versatile balancing components.
+const PROMPT_BETWEEN_PANTRY_AND_MENU = `
 
 ---
 
 ## EXISTING MENU CONTEXT
 
-**Format:** Name | Primary Flavor, Secondary Flavors | FF, FD | Strategic Role(s) | Pantry Used
+`
 
-### Dips
-- Salted Olive Hummus | Savory, Briny/Rich | FF5, FD3 | Brand Driver
-- Lamb Hummus | Savory, Tangy/Rich | FF4, FD3 | Revenue Driver
-- Muhammara | Smoky, Sweet/Rich | FF3, FD4 | Brand Driver
-- Hummus Mushroom | Savory, Earthy/Rich | FF4, FD3 | Brand Driver | Nduja Sauce
+const PROMPT_BETWEEN_MENU_AND_BASE = `### Kitchen Base Recipes
+`
 
-### Sides
-- House Made Pita Bread | Savory, Rich | FF5, FD1 | Margin Driver
-- Lamb Arayes | Savory, Smoky/Herbaceous | FF4, FD2 | Revenue Driver | Herb Yoghurt
-- Fried Feta Roll | Rich, Sweet/Savory | FF4, FD3 | Brand Driver | Hot Honey
-- Cod Patties | Savory, Tangy/Fresh | FF3, FD4 | Brand Driver | Amba Sauce
-- Vermicelli Rice | Savory, Rich | FF5, FD1 | Margin Driver
-- Sous Vide Potato Fries | Savory, Rich/Spicy | FF5, FD1 | Revenue Driver
-
-### Veggies
-- Burghul Salad | Fresh, Tangy/Herbaceous | FF4, FD2 | Margin Driver
-- Caramelized Carrots | Sweet, Tangy/Spicy/Rich | FF3, FD4 | Brand Driver | Tzatziki, Nduja Sauce
-- Watermelon Salad | Fresh, Sweet/Tangy | FF3, FD4 | Brand Driver | Labneh, Watermelon Dressing
-
-### Large Plates
-- Roast Chicken | Savory, Tangy/Smoky | FF5, FD2 | Revenue Driver | Habanero Sauce, Green Sauce
-- Grilled Lamb Chops | Savory, Herbaceous/Rich | FF4, FD2 | Revenue Driver | Herb Yoghurt
-- Grilled Steak Cube | Savory, Smoky/Fresh | FF5, FD2 | Revenue Driver | Chimichurri
-- Grilled Beef Cheek | Rich, Tangy/Savory | FF4, FD3 | Brand Driver | Labneh, Tzatziki
-- Seared Gindara | Rich, Tangy/Savory | FF3, FD4 | Brand Driver
-- Tarator Salmon | Rich, Tangy/Fresh | FF3, FD4 | Brand Driver | Labneh
-- Roasted Eggplant | Rich, Smoky/Sweet/Tangy | FF3, FD4 | Brand Driver | Hot Honey
-
-### Dessert
-- Pistachio Crème Brûlée | Sweet, Rich/Nutty | FF4, FD2 | Revenue Driver
-- Kunafa Cheese Bake | Sweet, Rich/Tangy | FF3, FD4 | Brand Driver
-
-### Pockets
-*(empty — no active dishes in this category)*
-
----
-
-### Kitchen Base Recipes
-Merguez, Spiced Lamb Kebabs, Joojeh Kabob, Zaatar Lamb, Moroccan Lamb, Quzi Lamb, Almond Raisin Crusted Quzi, Lamb Kofta, Lamb Arayes, Baharat Beef Mixture, Beef Kofta, Harissa Spiced Beef Kebabs, Beef Shawarma, Beef Chorizo, Braised Beef Cheek, Fish Cake, Sumac Chicken Drumstick, Home Made Pita Bread, Arabic Rice with Vermicelli, Turmeric Basmati Rice.
+const PROMPT_TAIL = `
 
 Before inventing a new preparation, consider whether an existing Base Recipe can be reused or remixed. Prefer leveraging existing preparations when it strengthens operational feasibility.
-
----
-
-## KEY GAPS (reference when assessing a brief)
-
-**Flavor gaps:** Briny is almost absent. Creamy is sparse. Bright/citrus-forward dishes are few. The menu skews heavily Savory and Rich.
-
-**Category gaps:** Pockets is completely empty. Veggies has only 3 items and no protein-led vegetarian main.
-
-**FF/FD gaps:** Very few dishes at FF5/FD4+ (familiar format, high discovery).
-
-**Strategic role gaps:** Margin Drivers are very few. VIP Drivers are absent from the main menu.
-
-**Pantry utilization:** Hot Honey on 2 dishes. Chimichurri on 1. Tapenade, Habanero Sauce, Green Sauce, Shawarma Spice Blend, Spicy Za'atar, Dukkah, Sumac Onion not yet on any main menu dish — high-leverage assets waiting to be deployed.
 
 ---
 
@@ -289,3 +214,15 @@ Generate tensions, narrative, wave structure (set menu only), and dish slots. Do
 
 **Menu Collection dish detail** → call \`save_concepts\`
 Generate exactly 1 concept in full. The concepts array must contain exactly 1 item. Narrative field is unused — leave it as an empty string.`
+
+export function buildSystemPrompt(ctx: CatalogueContext): string {
+  return (
+    PROMPT_HEAD +
+    ctx.pantrySection +
+    PROMPT_BETWEEN_PANTRY_AND_MENU +
+    ctx.menuSection +
+    PROMPT_BETWEEN_MENU_AND_BASE +
+    ctx.baseRecipesLine +
+    PROMPT_TAIL
+  )
+}

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
-import { SYSTEM_PROMPT } from '@/lib/ai/system-prompt'
+import { buildSystemPrompt } from '@/lib/ai/system-prompt'
+import { buildCatalogueContext } from '@/lib/ai/catalogue-context'
 import type { CollectionDishSlot } from '@/lib/supabase/types'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
@@ -118,6 +119,9 @@ export async function POST(req: NextRequest) {
     if (briefError || !brief) {
       return NextResponse.json({ error: 'Brief not found' }, { status: 404 })
     }
+
+    const catalogueCtx = await buildCatalogueContext(supabase)
+    const SYSTEM_PROMPT = buildSystemPrompt(catalogueCtx)
 
     const { data: recentRaw } = await supabase
       .from('rd_concepts')

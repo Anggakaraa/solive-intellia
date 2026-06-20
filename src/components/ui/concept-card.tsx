@@ -31,6 +31,7 @@ export type ConceptCardData = {
   } | null
   experiment_focus: string[]
   status: string
+  exploration_mode?: string | null
 }
 
 interface ConceptCardProps {

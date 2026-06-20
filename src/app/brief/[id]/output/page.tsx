@@ -3,11 +3,11 @@ import { notFound } from 'next/navigation'
 import { BackLink } from '@/components/ui/back-link'
 import { PageHeader } from '@/components/ui/page-header'
 import { SectionCard } from '@/components/ui/section-card'
-import { ConceptTabs } from '@/components/ui/concept-tabs'
 import { ConceptCard } from '@/components/ui/concept-card'
 import type { ConceptCardData } from '@/components/ui/concept-card'
 import { SaveCollectionButton } from './SaveCollectionButton'
 import { CollectionOutput } from './CollectionOutput'
+import { ModedConceptsPanel } from './ModedConceptsPanel'
 import type { CollectionOutputData, RdConcept } from '@/lib/supabase/types'
 
 function toConceptCardData(row: Record<string, unknown>): ConceptCardData {
@@ -21,6 +21,7 @@ function toConceptCardData(row: Record<string, unknown>): ConceptCardData {
     feasibility: row.feasibility as ConceptCardData['feasibility'],
     experiment_focus: (row.experiment_focus as string[]) ?? [],
     status: row.status as string,
+    exploration_mode: (row.exploration_mode as string | null) ?? 'balanced',
   }
 }
 
@@ -120,28 +121,17 @@ export default async function BriefOutputPage({ params }: { params: Promise<{ id
           )}
         </>
       ) : (
-        <>
-          {/* Single dish — tabbed alternatives */}
-          {narrative && (
-            <SectionCard variant="muted" label="Brief Tensions" className="mb-6">
-              <p className="text-sm text-ink-mid font-light leading-relaxed whitespace-pre-line">{narrative}</p>
-            </SectionCard>
-          )}
-          {concepts.length === 0 ? (
-            <div className="text-center py-16 text-ink-muted border border-dashed border-olive/25 rounded-lg">
-              <p className="text-sm font-light">No concepts found for this brief.</p>
-            </div>
-          ) : (
-            <ConceptTabs
-              concepts={concepts}
-              ff={brief.format_familiarity as number | null}
-              fd={brief.flavor_discovery as number | null}
-              strategicRoles={(brief.strategic_roles as string[] | null) ?? []}
-              recommendation={recommendation ?? undefined}
-              savedIds={concepts.filter(c => c.status === 'saved').map(c => c.id)}
-            />
-          )}
-        </>
+        /* Single dish — mode-filtered tabs */
+        <ModedConceptsPanel
+          briefId={id}
+          generationMode={(brief.generation_mode as 'full' | 'fast' | null) ?? 'full'}
+          concepts={concepts}
+          ff={brief.format_familiarity as number | null}
+          fd={brief.flavor_discovery as number | null}
+          strategicRoles={(brief.strategic_roles as string[] | null) ?? []}
+          narrative={narrative}
+          recommendation={recommendation}
+        />
       )}
     </div>
   )

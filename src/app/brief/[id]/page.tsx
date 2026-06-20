@@ -7,7 +7,6 @@ import { Pill } from '@/components/ui/pill'
 import { SectionCard } from '@/components/ui/section-card'
 import { DeleteButton } from '@/components/ui/delete-button'
 import { mutedBtnCls } from '@/lib/styles'
-import { GenerateConceptButton } from './GenerateConceptButton'
 
 function BriefField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -180,14 +179,13 @@ export default async function BriefDetailPage({ params }: { params: Promise<{ id
                 {isCollection ? 'View Collection →' : 'View Dish →'}
               </Link>
             </div>
-            <div className="pt-3">
-              <GenerateConceptButton briefId={id} briefType={brief.brief_type ?? 'dish'} label="Regenerate" variant="ghost" />
-            </div>
           </div>
         ) : (
           <div className="border border-dashed border-olive/25 rounded-lg px-5 py-8 text-center">
             <p className="text-sm text-ink-muted font-light mb-4">No concepts generated yet.</p>
-            <GenerateConceptButton briefId={id} briefType={brief.brief_type ?? 'dish'} label="Generate Concept" variant="primary" />
+            <Link href={`/brief/${id}/output`} className={mutedBtnCls}>
+              Go to Output →
+            </Link>
           </div>
         )}
       </div>

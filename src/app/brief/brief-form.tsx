@@ -36,7 +36,6 @@ type FormData = {
   creative_references: string
   desired_feeling: string
   constraints: string
-  exploration_mode: 'safe' | 'balanced' | 'exploratory'
   generation_mode: 'full' | 'fast'
 }
 
@@ -92,7 +91,6 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
     creative_references: initialValues?.creative_references ?? '',
     desired_feeling: initialValues?.desired_feeling ?? '',
     constraints: initialValues?.constraints ?? '',
-    exploration_mode: (initialValues?.exploration_mode as FormData['exploration_mode']) ?? 'balanced',
     generation_mode: (initialValues?.generation_mode as FormData['generation_mode']) ?? 'full',
   })
 
@@ -138,7 +136,6 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
       desired_feeling: form.desired_feeling || null,
       constraints: form.constraints || null,
       collection_format: isMenu ? form.collection_format : 'a_la_carte',
-      exploration_mode: form.exploration_mode,
       generation_mode: form.generation_mode,
     }
 
@@ -165,7 +162,7 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
       const genRes = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ briefId: data.id }),
+        body: JSON.stringify({ briefId: data.id, explorationMode: 'balanced' }),
       })
 
       if (!genRes.ok) {
@@ -309,27 +306,6 @@ export function BriefForm({ categoryOptions, roleOptions, pantryOptions, briefId
             onChange={(v) => set('pantry_assets', v)}
             placeholder="No pantry asset specified"
           />
-        </Field>
-
-        {/* Exploration Mode */}
-        <Field label="Exploration Mode">
-          <div className="flex gap-1.5">
-            {(['safe', 'balanced', 'exploratory'] as const).map((value) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => set('exploration_mode', value)}
-                className={cn(
-                  'text-[12px] px-3 py-1.5 rounded-full border transition-colors capitalize',
-                  form.exploration_mode === value
-                    ? 'bg-olive text-cream border-olive'
-                    : 'bg-white text-ink-mid border-olive/20 hover:border-olive/50'
-                )}
-              >
-                {value === 'exploratory' ? 'Explore' : value.charAt(0).toUpperCase() + value.slice(1)}
-              </button>
-            ))}
-          </div>
         </Field>
 
         {/* Generation Mode — single dish only */}

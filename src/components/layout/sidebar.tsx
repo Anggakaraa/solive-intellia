@@ -16,6 +16,8 @@ import {
   Bookmark,
   FolderOpen,
   Palette,
+  BarChart2,
+  FlaskConical,
 } from 'lucide-react'
 
 const sections = [
@@ -32,6 +34,13 @@ const sections = [
     items: [
       { href: '/principles', label: 'Principles', icon: BookOpen },
       { href: '/reference', label: 'Reference Data', icon: Settings },
+    ],
+  },
+  {
+    label: 'Analytics',
+    items: [
+      { href: '/analytics', label: 'Performance', icon: BarChart2 },
+      { href: '/analytics/intelligence', label: 'Menu Intelligence', icon: FlaskConical },
     ],
   },
   {
@@ -58,6 +67,7 @@ export function Sidebar() {
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/'
     if (href === '/brief') return pathname === '/brief'
+    if (href === '/analytics') return pathname === '/analytics'
     return pathname.startsWith(href)
   }
 

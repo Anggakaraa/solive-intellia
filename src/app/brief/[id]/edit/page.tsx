@@ -47,7 +47,6 @@ export default async function EditBriefPage({ params }: { params: Promise<{ id: 
           creative_references: brief.creative_references ?? '',
           desired_feeling: brief.desired_feeling ?? '',
           constraints: brief.constraints ?? '',
-          exploration_mode: (brief.exploration_mode as 'safe' | 'balanced' | 'exploratory') ?? 'balanced',
           generation_mode: (brief.generation_mode as 'full' | 'fast') ?? 'full',
         }}
         categoryOptions={categories?.map((c) => c.name) ?? []}

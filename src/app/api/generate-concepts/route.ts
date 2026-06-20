@@ -69,8 +69,7 @@ const SAVE_CONCEPTS_TOOL: Anthropic.Tool = {
   },
 }
 
-function buildBriefMessage(brief: Record<string, unknown>, recentConcepts: string[] = []): string {
-  const explorationMode = (brief.exploration_mode as string) ?? 'balanced'
+function buildBriefMessage(brief: Record<string, unknown>, explorationMode: string, recentConcepts: string[] = []): string {
   const generationMode = (brief.generation_mode as string) ?? 'full'
 
   const lines: string[] = [
@@ -125,7 +124,7 @@ export const maxDuration = 120
 
 export async function POST(req: NextRequest) {
   try {
-    const { briefId } = await req.json()
+    const { briefId, explorationMode: bodyMode } = await req.json()
     if (!briefId) return NextResponse.json({ error: 'briefId required' }, { status: 400 })
 
     const supabase = await createClient()
@@ -139,20 +138,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Brief not found' }, { status: 404 })
     }
 
+    const explorationMode = (bodyMode && ['safe', 'balanced', 'exploratory'].includes(bodyMode))
+      ? bodyMode as string
+      : 'balanced'
+
     const catalogueCtx = await buildCatalogueContext(supabase)
     const SYSTEM_PROMPT = buildSystemPrompt(catalogueCtx)
 
     const isFast = brief.generation_mode === 'fast'
     const maxTokens = isFast ? 1200 : 2000
 
+    // Dedup list is mode-scoped — each mode builds its own lineage
     const { data: recentRaw } = await supabase
       .from('rd_concepts')
       .select('concept_name')
+      .eq('brief_id', briefId)
+      .eq('exploration_mode', explorationMode)
       .order('created_at', { ascending: false })
-      .limit(15)
+      .limit(10)
     const recentConcepts = (recentRaw ?? []).map((r) => r.concept_name)
 
-    const userMessage = buildBriefMessage(brief, recentConcepts)
+    const userMessage = buildBriefMessage(brief, explorationMode, recentConcepts)
     const estInputTokens = Math.round(SYSTEM_PROMPT.length / 3) + Math.round(userMessage.length / 4)
     console.log('[generate-concepts] Calling Claude', {
       mode: `${brief.brief_type} / ${brief.generation_mode}`,
@@ -231,6 +237,7 @@ export async function POST(req: NextRequest) {
       feasibility: c.feasibility,
       experiment_focus: c.experiment_focus,
       status: 'generated',
+      exploration_mode: explorationMode,
     }))
 
     const { error: insertError } = await supabase.from('rd_concepts').insert(conceptRows)

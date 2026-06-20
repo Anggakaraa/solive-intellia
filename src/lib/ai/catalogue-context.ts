@@ -41,12 +41,12 @@ export async function buildCatalogueContext(supabase: SupabaseClient): Promise<C
     supabase
       .from('pantry_items')
       .select('id, name, flavor_contributions, best_pairings, cautions')
-      .eq('status', 'active')
+      .neq('status', 'inactive')
       .order('name'),
     supabase
       .from('menu_items')
       .select('id, name, category, primary_flavor_identity, secondary_flavor_identities, format_familiarity, flavor_discovery, strategic_roles')
-      .eq('status', 'active')
+      .neq('status', 'inactive')
       .order('name'),
     supabase
       .from('menu_item_pantry_links')

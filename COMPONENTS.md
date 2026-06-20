@@ -322,6 +322,19 @@ The first tab is always labeled "Recommended". Concepts are passed newest-first 
 
 ---
 
+### 16. `KpiCard` ✅ — `src/components/ui/kpi-card.tsx`
+
+Metric display card for analytics dashboards. Shows a micro-label, a large serif value, and an optional note line.
+
+```tsx
+<KpiCard label="Total Revenue" value="Rp 4.2M" />
+<KpiCard label="Units Sold" value="1,847" note="across all categories" />
+```
+
+Used in `/analytics` in a 3-column grid. Not for use outside analytics contexts.
+
+---
+
 ## Page-Level Layout Patterns
 
 ### Detail page structure

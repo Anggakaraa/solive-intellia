@@ -12,6 +12,10 @@ import { ScoreSlider } from '@/components/forms/score-slider'
 import { MultiSelect } from '@/components/forms/multi-select'
 import { ConceptCard } from '@/components/ui/concept-card'
 import { ConceptTabs } from '@/components/ui/concept-tabs'
+import { CategoryBreakdown } from '@/app/analytics/CategoryBreakdown'
+import { MarginMatrix } from '@/app/analytics/MarginMatrix'
+import { FFDMatrix } from '@/app/analytics/FFDMatrix'
+import { PantryMatrix } from '@/app/analytics/PantryMatrix'
 import {
   primaryBtnCls, ghostBtnCls, mutedBtnCls, destructiveBtnCls,
   outlinedBtnCls, outlinedDestructiveBtnCls,
@@ -409,6 +413,50 @@ export default function ComponentLibraryPage() {
           recommendation="Concept 1 — Charred Eggplant — is the stronger choice. It fills the vegetable centrepiece gap cleanly and gives Muhammara its first standalone showcase moment on the main menu."
           savedIds={[]}
         />
+      </Section>
+
+      {/* ── Analytics Components ── */}
+      <Section title="Analytics Components" description="Page-specific to /analytics. Import from src/app/analytics/, not src/components/.">
+
+        <Label>CategoryBreakdown — server component table (shown here with mock data)</Label>
+        <CategoryBreakdown categories={[
+          { name: 'Sharing Plates', units: 620, margin: 8_200_000 },
+          { name: 'Mains', units: 410, margin: 6_100_000 },
+          { name: 'Dessert', units: 280, margin: 3_400_000 },
+          { name: 'Sides', units: 190, margin: 1_800_000 },
+        ]} />
+
+        <Label>MarginMatrix — Chart.js bubble, log x-axis, quadrant annotation</Label>
+        <MarginMatrix dishes={[
+          { id: '1', name: 'Beef Kofta Pockets', revenue: 12_500_000, marginPct: 68, units: 310 },
+          { id: '2', name: 'Lamb Arayes', revenue: 9_800_000, marginPct: 72, units: 245 },
+          { id: '3', name: 'Caramelized Carrots', revenue: 4_200_000, marginPct: 81, units: 280 },
+          { id: '4', name: 'Grilled Steak Cube', revenue: 18_000_000, marginPct: 45, units: 200 },
+          { id: '5', name: 'Fattoush Salad', revenue: 2_100_000, marginPct: 55, units: 140 },
+          { id: '6', name: 'Hummus Mushroom', revenue: 3_400_000, marginPct: 38, units: 90 },
+        ]} />
+
+        <Label>FFDMatrix — heatmap, olive intensity = margin, hover for dish names</Label>
+        <FFDMatrix cells={[
+          { ff: 2, fd: 2, margin: 6_100_000, activeDishes: 2, conceptDishes: 0, dishNames: ['Beef Kofta Pockets', 'Lamb Arayes'], conceptNames: [] },
+          { ff: 3, fd: 3, margin: 4_200_000, activeDishes: 1, conceptDishes: 1, dishNames: ['Caramelized Carrots'], conceptNames: ['Spiced Cauliflower'] },
+          { ff: 4, fd: 4, margin: 2_800_000, activeDishes: 1, conceptDishes: 0, dishNames: ['Roasted Eggplant'], conceptNames: [] },
+          { ff: 1, fd: 5, margin: 0,         activeDishes: 0, conceptDishes: 2, dishNames: [], conceptNames: ['Amba Ice Cream', 'Sumac Granita'] },
+          { ff: 5, fd: 1, margin: 9_200_000, activeDishes: 3, conceptDishes: 0, dishNames: ['Grilled Steak Cube', 'Fattoush Salad', 'Hummus Mushroom'], conceptNames: [] },
+        ]} />
+
+        <Label>PantryMatrix — scatter, X = dish count, Y = total units, name labels on hover</Label>
+        <PantryMatrix points={[
+          { name: 'Tzatziki',           dishCount: 3, totalUnits: 3875, dishNames: ['Caramelized Carrots', 'Grilled Beef Cheek', 'Beef Kofta Pockets'] },
+          { name: 'Hot Honey',          dishCount: 3, totalUnits: 3137, dishNames: ['Caramelized Carrots', 'Fried Feta Roll', 'Roasted Eggplant'] },
+          { name: 'Labneh',             dishCount: 3, totalUnits: 2826, dishNames: ['Grilled Beef Cheek', 'Watermelon Salad', 'Tahini Date Cake'] },
+          { name: 'Herb Yoghurt',       dishCount: 1, totalUnits: 2178, dishNames: ['Lamb Arayes'] },
+          { name: 'Chimichurri',        dishCount: 1, totalUnits:  918, dishNames: ['Grilled Steak Cube'] },
+          { name: 'Watermelon Dressing',dishCount: 1, totalUnits:  688, dishNames: ['Fattoush Salad'] },
+          { name: 'Nduja Sauce',        dishCount: 1, totalUnits:  475, dishNames: ['Hummus Mushroom'] },
+          { name: 'Harissa Paste',      dishCount: 1, totalUnits:  186, dishNames: ['Spicy Harissa Meatballs'] },
+        ]} />
+
       </Section>
     </div>
   )

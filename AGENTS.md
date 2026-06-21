@@ -41,3 +41,16 @@ Instead:
 4. Once confirmed, build it **and** add it to `COMPONENTS.md`
 
 This keeps the design system intentional — not a graveyard of one-off components.
+
+## 3. Keep the component library page in sync
+
+`/tools/components` (`src/app/tools/components/page.tsx`) is the **live visual reference** for the design system. It must stay in sync with `COMPONENTS.md`.
+
+**The rule: any time a component is added or changed, update both files in the same session.**
+
+Checklist at the end of any session where UI components were built or modified:
+- [ ] Is the new component documented in `COMPONENTS.md`?
+- [ ] Is it rendered with realistic mock data in `src/app/tools/components/page.tsx`?
+- [ ] If an existing component's props or behaviour changed, is the library page updated too?
+
+For analytics components (`src/app/analytics/`): import directly into the library page with static mock data — do not connect to Supabase. The mock data should reflect realistic values (real dish names, real order-of-magnitude numbers) so the visual output is meaningful, not placeholder Lorem Ipsum.

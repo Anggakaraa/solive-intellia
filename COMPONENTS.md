@@ -335,6 +335,177 @@ Used in `/analytics` in a 3-column grid. Not for use outside analytics contexts.
 
 ---
 
+## Analytics Components
+
+Analytics components live in `src/app/analytics/` (not `src/components/`) because they are page-specific and depend on data types local to the analytics layer. They follow the same design token and SectionCard conventions as global components.
+
+**Rule:** Never import analytics components outside of `/analytics` pages. If a visualisation needs to be reused elsewhere, extract it to `src/components/` at that point.
+
+---
+
+### 17. `CategoryBreakdown` ✅ — `src/app/analytics/CategoryBreakdown.tsx`
+
+Server component table showing sales breakdown by menu category. Columns: Category · Margin (Rp) · % of total · Units · % of total. Sorted by margin descending.
+
+```tsx
+import { CategoryBreakdown, type CategoryData } from './CategoryBreakdown'
+
+// CategoryData = { name: string; units: number; margin: number }
+<CategoryBreakdown categories={categories} />
+```
+
+No `'use client'` — pure server component. Computes totals internally from the `categories` array.
+
+---
+
+### 18. `MarginMatrix` ✅ — `src/app/analytics/MarginMatrix.tsx`
+
+Chart.js bubble chart. X = revenue (log scale), Y = margin %, bubble size = units sold. Classifies dishes into Stars / Workhorses / Puzzles / Dogs quadrants via background annotation.
+
+```tsx
+import { MarginMatrix, type MatrixDish } from './MarginMatrix'
+
+// MatrixDish = { id: string; name: string; revenue: number; marginPct: number; units: number }
+<MarginMatrix dishes={matrixDishes} />
+```
+
+**Must register `LogarithmicScale` explicitly** — Chart.js tree-shakes it out by default:
+```ts
+import { Chart, BubbleController, LinearScale, LogarithmicScale, PointElement, Tooltip } from 'chart.js'
+Chart.register(BubbleController, LinearScale, LogarithmicScale, PointElement, Tooltip, ChartDataLabels)
+```
+
+Filter input: only pass dishes with `revenue > 0 && marginPct > 0` — dishes with missing pricing data would plot at the origin and pollute the quadrant.
+
+---
+
+### 19. `FFDMatrix` ✅ — `src/app/analytics/FFDMatrix.tsx`
+
+Client component heatmap. X = Format Familiarity (1–5), Y = Flavor Discovery (1–5). Cell color intensity = gross margin relative to max. Shows active dish count and concept dish count per cell. Hover reveals dish names via fixed-position tooltip.
+
+```tsx
+import { FFDMatrix, type FFDCell } from './FFDMatrix'
+
+// FFDCell = {
+//   ff: number; fd: number; margin: number
+//   activeDishes: number; conceptDishes: number
+//   dishNames: string[]; conceptNames: string[]
+// }
+<FFDMatrix cells={ffdCells} />
+```
+
+FD rows render in reverse (FD5 at top). Active cells: olive background with intensity = `margin / maxMargin`. Concept-only cells: dashed border, no fill. Empty cells: `bg-cream-dark`.
+
+Uses the **canonical fixed-position tooltip pattern** (see below).
+
+---
+
+### 20. `PantryMatrix` ✅ — `src/app/analytics/PantryMatrix.tsx`
+
+Client component scatter plot. X = number of active dishes using the pantry item, Y = total units sold across those dishes. Each point labeled with the pantry item name. Hover reveals which dishes use that ingredient.
+
+```tsx
+import { PantryMatrix, type PantryPoint } from './PantryMatrix'
+
+// PantryPoint = { name: string; dishCount: number; totalUnits: number; dishNames: string[] }
+<PantryMatrix points={pantryPoints} />
+```
+
+Axis tick labels are hidden — pure visual positioning. Uses ChartDataLabels for name labels on points. Uses the **canonical fixed-position tooltip pattern** (see below).
+
+Only pass active dishes in `pantryPoints` — filter `mi.status !== 'active'` before computing points.
+
+---
+
+## Canonical Patterns
+
+### Fixed-position tooltip
+
+Use this pattern for any hover tooltip inside a component that has `overflow: hidden` on a parent — which covers all SectionCard-wrapped charts and grids. `position: absolute` tooltips get clipped; `position: fixed` + `getBoundingClientRect()` escapes the stacking context entirely.
+
+```tsx
+'use client'
+import { useState } from 'react'
+
+type TooltipState = { data: YourType; rect: DOMRect } | null
+
+// Inside component:
+const [tooltip, setTooltip] = useState<TooltipState>(null)
+
+function handleEnter(e: React.MouseEvent<HTMLDivElement>, data: YourType) {
+  setTooltip({ data, rect: e.currentTarget.getBoundingClientRect() })
+}
+
+// On the hoverable element:
+<div
+  onMouseEnter={(e) => handleEnter(e, item)}
+  onMouseLeave={() => setTooltip(null)}
+>
+  ...
+</div>
+
+// Single tooltip rendered at component root (not inside the hovered element):
+{tooltip && (
+  <div
+    className="fixed z-50 w-52 bg-[#1E2218] text-cream rounded-md shadow-xl px-3 py-2.5 pointer-events-none"
+    style={{
+      left: tooltip.rect.left + tooltip.rect.width / 2,
+      top:  tooltip.rect.top - 10,
+      transform: 'translate(-50%, -100%)',
+    }}
+  >
+    {/* tooltip content */}
+  </div>
+)}
+```
+
+**Never** render the tooltip as a child of the hovered element. Always render it as a sibling at the component root.
+
+---
+
+### Server vs Client component rule
+
+| Use server component (`async function`, no `'use client'`) | Use client component (`'use client'`) |
+|---|---|
+| Fetching data from Supabase | Any `useState`, `useEffect`, `useRef` |
+| Static display of fetched data | Chart.js / canvas rendering |
+| Tables, lists, text blocks | Hover/click interactivity |
+| `CategoryBreakdown` pattern | `FFDMatrix`, `PantryMatrix`, `MarginMatrix` pattern |
+
+Data fetching always happens in the server component (page or layout). Client components receive pre-fetched data as props — they never call Supabase directly.
+
+---
+
+### Chart.js registration rule
+
+Chart.js is tree-shaken. Every scale, controller, and element used must be explicitly registered. Missing registration fails silently on some scales (e.g. `logarithmic`) and throws at runtime on others.
+
+```ts
+// Import only what you use, then register all of it:
+import {
+  Chart,
+  ScatterController,   // for scatter
+  BubbleController,    // for bubble
+  LinearScale,
+  LogarithmicScale,    // must be explicit — not included in LinearScale
+  PointElement,
+  Tooltip,
+} from 'chart.js'
+import ChartDataLabels from 'chartjs-plugin-datalabels'
+
+Chart.register(ScatterController, LinearScale, LogarithmicScale, PointElement, Tooltip, ChartDataLabels)
+```
+
+Always destroy the chart instance on component unmount:
+```ts
+useEffect(() => {
+  chartRef.current = new Chart(...)
+  return () => { chartRef.current?.destroy() }
+}, [data])
+```
+
+---
+
 ## Page-Level Layout Patterns
 
 ### Detail page structure

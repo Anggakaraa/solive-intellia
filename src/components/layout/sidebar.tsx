@@ -18,6 +18,7 @@ import {
   Palette,
   BarChart2,
   FlaskConical,
+  SlidersHorizontal,
 } from 'lucide-react'
 
 const sections = [
@@ -56,6 +57,7 @@ const sections = [
     label: 'Tools',
     items: [
       { href: '/export', label: 'Export', icon: Download },
+      { href: '/tools/ff-fd-survey', label: 'FF/FD Survey', icon: SlidersHorizontal },
       { href: '/tools/components', label: 'Component Library', icon: Palette },
     ],
   },

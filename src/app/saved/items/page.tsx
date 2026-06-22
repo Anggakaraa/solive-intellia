@@ -10,7 +10,7 @@ export default async function SavedItemsPage() {
 
   const { data: concepts } = await supabase
     .from('rd_concepts')
-    .select('id, concept_name, one_line, status, brief_id, created_at')
+    .select('id, concept_name, one_line, status, brief_id, created_at, format_familiarity, flavor_discovery, ff_fd_surveyed_at')
     .in('status', ['saved', 'testing', 'active'])
     .order('created_at', { ascending: false })
 
@@ -66,6 +66,11 @@ export default async function SavedItemsPage() {
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <p className="font-serif text-lg font-normal text-ink leading-snug">{concept.concept_name}</p>
                     <StatusBadge status={displayStatus} />
+                    {concept.format_familiarity && concept.flavor_discovery && (
+                      <span className="text-[10px] bg-olive/10 text-olive px-2 py-0.5 rounded-full tabular-nums">
+                        FF{concept.format_familiarity} · FD{concept.flavor_discovery}
+                      </span>
+                    )}
                   </div>
                   {concept.one_line && (
                     <p className="text-[12px] text-ink-muted font-light leading-relaxed">

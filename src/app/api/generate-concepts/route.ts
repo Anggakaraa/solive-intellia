@@ -114,11 +114,11 @@ function buildBriefMessage(brief: Record<string, unknown>, explorationMode: stri
   if (brief.constraints) lines.push(`\nConstraints:\n${brief.constraints}`)
 
   if (recentConcepts.length > 0) {
-    lines.push(`\nAlready generated for this brief — across all exploration modes. You MUST NOT repeat the primary protein or cooking technique of any of these:`)
+    lines.push(`\nAlready generated for this brief — across all exploration modes:`)
     recentConcepts.forEach(({ name, hero }) => {
       lines.push(`- ${name}${hero ? ` [${hero}]` : ''}`)
     })
-    lines.push(`\nDo not use the same primary protein or the same cooking technique (e.g. roasting, grilling, braising) as any concept above. Vary both.`)
+    lines.push(`\nAvoid repeating the same combination of primary protein and cooking technique. If you use the same protein as a previous concept, the cooking method and flavor direction must be meaningfully different.`)
   }
 
   return lines.join('\n')

@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
     const SYSTEM_PROMPT = buildSystemPrompt(catalogueCtx)
 
     const isFast = brief.generation_mode === 'fast'
-    const maxTokens = isFast ? 1200 : 2000
+    const maxTokens = isFast ? 1200 : 3000
 
     // Dedup list is mode-scoped — each mode builds its own lineage
     const { data: recentRaw } = await supabase

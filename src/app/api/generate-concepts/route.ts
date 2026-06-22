@@ -81,6 +81,10 @@ function buildBriefMessage(brief: Record<string, unknown>, explorationMode: stri
 
   lines.push(`Brief Type: ${brief.brief_type === 'menu_collection' ? 'Menu Collection' : 'Single Dish'}`)
 
+  if (brief.brief_type !== 'menu_collection') {
+    lines.push('Generate exactly 1 concept.')
+  }
+
   if (brief.brief_type === 'menu_collection') {
     if (brief.menu_theme) lines.push(`Menu Theme: ${brief.menu_theme}`)
     if (brief.menu_composition && !brief.ai_recommend_composition) {

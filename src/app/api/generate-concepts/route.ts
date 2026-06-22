@@ -69,7 +69,7 @@ const SAVE_CONCEPTS_TOOL: Anthropic.Tool = {
   },
 }
 
-function buildBriefMessage(brief: Record<string, unknown>, explorationMode: string, recentConcepts: string[] = []): string {
+function buildBriefMessage(brief: Record<string, unknown>, explorationMode: string, recentConcepts: { name: string; hero: string | null }[] = []): string {
   const generationMode = (brief.generation_mode as string) ?? 'full'
 
   const lines: string[] = [
@@ -114,7 +114,11 @@ function buildBriefMessage(brief: Record<string, unknown>, explorationMode: stri
   if (brief.constraints) lines.push(`\nConstraints:\n${brief.constraints}`)
 
   if (recentConcepts.length > 0) {
-    lines.push(`\nRecently generated concepts (do not repeat these approaches, primary proteins, or pantry pairings):\n${recentConcepts.map(n => `- ${n}`).join('\n')}`)
+    lines.push(`\nAlready generated for this brief — across all exploration modes. You MUST NOT repeat the primary protein or cooking technique of any of these:`)
+    recentConcepts.forEach(({ name, hero }) => {
+      lines.push(`- ${name}${hero ? ` [${hero}]` : ''}`)
+    })
+    lines.push(`\nDo not use the same primary protein or the same cooking technique (e.g. roasting, grilling, braising) as any concept above. Vary both.`)
   }
 
   return lines.join('\n')
@@ -148,15 +152,18 @@ export async function POST(req: NextRequest) {
     const isFast = brief.generation_mode === 'fast'
     const maxTokens = isFast ? 1200 : 3000
 
-    // Dedup list is mode-scoped — each mode builds its own lineage
+    // Dedup across ALL exploration modes for this brief — protein/technique diversity
+    // is brief-scoped, not mode-scoped. Exploratory should know what balanced already did.
     const { data: recentRaw } = await supabase
       .from('rd_concepts')
-      .select('concept_name')
+      .select('concept_name, breakdown')
       .eq('brief_id', briefId)
-      .eq('exploration_mode', explorationMode)
       .order('created_at', { ascending: false })
-      .limit(10)
-    const recentConcepts = (recentRaw ?? []).map((r) => r.concept_name)
+      .limit(15)
+    const recentConcepts = (recentRaw ?? []).map((r) => ({
+      name: r.concept_name,
+      hero: (r.breakdown as { hero?: string } | null)?.hero ?? null,
+    }))
 
     const userMessage = buildBriefMessage(brief, explorationMode, recentConcepts)
     const estInputTokens = Math.round(SYSTEM_PROMPT.length / 3) + Math.round(userMessage.length / 4)

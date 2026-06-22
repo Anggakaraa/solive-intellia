@@ -390,7 +390,9 @@ export function SurveyFlow({
           'w-full flex items-center gap-2 px-3 py-2.5 rounded-lg border text-left transition-colors',
           isSelected
             ? 'border-olive/40 bg-olive-faint'
-            : 'border-olive/12 bg-white hover:border-olive/25',
+            : dish.alreadySurveyed
+              ? 'border-olive/20 bg-olive/5 hover:border-olive/35'
+              : 'border-olive/12 bg-white hover:border-olive/25',
         ].join(' ')}
       >
         {isSelected

@@ -280,6 +280,7 @@ export function SurveyFlow({
   const [isPending, startTransition] = useTransition()
 
   const [phase, setPhase]             = useState<Phase>('selecting')
+  const [filterTab, setFilterTab]     = useState<'unscored' | 'scored' | 'all'>('unscored')
   const [selected, setSelected]       = useState<Set<string>>(new Set())
   const [queue, setQueue]             = useState<SurveyDish[]>([])
   const [currentIdx, setCurrentIdx]   = useState(0)
@@ -378,7 +379,7 @@ export function SurveyFlow({
     })
   }
 
-  // ── Dish row (selection screen) ────────────────────────────────────────────
+  // ── Compact dish row (selection screen) ──────────────────────────────────
 
   function DishRow({ dish }: { dish: SurveyDish }) {
     const isSelected = selected.has(dish.id)
@@ -386,33 +387,28 @@ export function SurveyFlow({
       <button
         onClick={() => toggleDish(dish.id)}
         className={[
-          'w-full flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-colors',
+          'w-full flex items-center gap-2 px-3 py-2.5 rounded-lg border text-left transition-colors',
           isSelected
             ? 'border-olive/40 bg-olive-faint'
             : 'border-olive/12 bg-white hover:border-olive/25',
         ].join(' ')}
       >
         {isSelected
-          ? <CheckCircle2 size={16} className="text-olive shrink-0" />
-          : <Circle size={16} className="text-ink-muted/40 shrink-0" />
+          ? <CheckCircle2 size={14} className="text-olive shrink-0" />
+          : <Circle size={14} className="text-ink-muted/30 shrink-0" />
         }
-        <div className="flex-1 min-w-0">
-          <p className="text-sm text-ink truncate">{dish.name}</p>
+        <p className="text-[13px] text-ink truncate flex-1">{dish.name}</p>
+        <div className="flex items-center gap-1.5 shrink-0">
           {dish.category && (
-            <p className="text-[11px] text-ink-muted font-light">{dish.category}</p>
+            <span className="text-[10px] text-ink-muted/60 hidden sm:inline">{dish.category}</span>
           )}
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          {dish.alreadySurveyed && (
-            <span className="text-[10px] bg-olive/10 text-olive px-2 py-0.5 rounded-full">
-              scored
-            </span>
+          {dish.sourceType === 'rd_concept' && (
+            <span className="text-[9px] uppercase tracking-wide text-ink-muted/50">concept</span>
           )}
-          {dish.existingFF !== null && dish.existingFD !== null && (
-            <span className="text-[11px] text-ink-muted tabular-nums">
-              FF{dish.existingFF} · FD{dish.existingFD}
-            </span>
-          )}
+          {dish.existingFF !== null && dish.existingFD !== null
+            ? <span className="text-[10px] tabular-nums text-olive font-medium">FF{dish.existingFF}·FD{dish.existingFD}</span>
+            : <span className="w-2 h-2 rounded-full bg-olive/15 shrink-0" />
+          }
         </div>
       </button>
     )
@@ -442,34 +438,58 @@ export function SurveyFlow({
   }
 
   if (phase === 'selecting') {
+    const allDishes    = [...menuItems, ...savedConcepts]
+    const unscoredCount = allDishes.filter((d) => !d.alreadySurveyed).length
+    const scoredCount   = allDishes.filter((d) =>  d.alreadySurveyed).length
+
+    const visibleDishes = allDishes.filter((d) => {
+      if (filterTab === 'unscored') return !d.alreadySurveyed
+      if (filterTab === 'scored')   return  d.alreadySurveyed
+      return true
+    })
+
+    const tabs: { key: typeof filterTab; label: string; count: number }[] = [
+      { key: 'unscored', label: 'Unscored', count: unscoredCount },
+      { key: 'scored',   label: 'Scored',   count: scoredCount },
+      { key: 'all',      label: 'All',      count: allDishes.length },
+    ]
+
     return (
       <div>
-        <div className="grid grid-cols-1 gap-6">
-          {menuItems.length > 0 && (
-            <SectionCard label="Menu Items">
-              <p className="text-[11px] text-ink-muted font-light -mt-1 mb-4">
-                Active and concept dishes
-              </p>
-              <div className="space-y-1.5">
-                {menuItems.map((d) => <DishRow key={d.id} dish={d} />)}
-              </div>
-            </SectionCard>
-          )}
-
-          {savedConcepts.length > 0 && (
-            <SectionCard label="Saved Concepts">
-              <p className="text-[11px] text-ink-muted font-light -mt-1 mb-4">
-                R&D concepts saved from brief output
-              </p>
-              <div className="space-y-1.5">
-                {savedConcepts.map((d) => <DishRow key={d.id} dish={d} />)}
-              </div>
-            </SectionCard>
-          )}
+        {/* Filter tabs */}
+        <div className="flex gap-1 mb-4 bg-cream-dark rounded-lg p-1 w-fit">
+          {tabs.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setFilterTab(t.key)}
+              className={[
+                'px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors',
+                filterTab === t.key
+                  ? 'bg-white text-ink shadow-sm'
+                  : 'text-ink-muted hover:text-ink',
+              ].join(' ')}
+            >
+              {t.label}
+              <span className={['ml-1.5 text-[10px]', filterTab === t.key ? 'text-ink-muted' : 'text-ink-muted/50'].join(' ')}>
+                {t.count}
+              </span>
+            </button>
+          ))}
         </div>
 
+        {/* Two-column grid */}
+        {visibleDishes.length === 0 ? (
+          <p className="text-sm text-ink-muted font-light py-8 text-center">
+            {filterTab === 'unscored' ? 'All dishes have been scored.' : 'No scored dishes yet.'}
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 gap-1.5">
+            {visibleDishes.map((d) => <DishRow key={d.id} dish={d} />)}
+          </div>
+        )}
+
         {selected.size > 0 && (
-          <div className="mt-6 flex justify-end">
+          <div className="mt-5 flex justify-end">
             <button className={primaryBtnCls} onClick={startSurvey}>
               Start survey — {selected.size} {selected.size === 1 ? 'dish' : 'dishes'}
             </button>

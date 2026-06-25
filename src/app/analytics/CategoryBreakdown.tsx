@@ -30,6 +30,7 @@ export function CategoryBreakdown({ categories }: { categories: CategoryData[] }
         <span className="w-20 text-right text-[10px] text-ink-muted uppercase tracking-wide">Margin</span>
         <span className="w-10 text-right text-[10px] text-ink-muted uppercase tracking-wide">%</span>
         <span className="w-16 text-right text-[10px] text-ink-muted uppercase tracking-wide">Units</span>
+        <span className="w-10 text-right text-[10px] text-ink-muted uppercase tracking-wide">%</span>
       </div>
 
       <div className="space-y-0 -mx-5 -mb-5">
@@ -51,6 +52,9 @@ export function CategoryBreakdown({ categories }: { categories: CategoryData[] }
             <span className="w-16 text-right text-sm text-ink tabular-nums shrink-0">
               {cat.units.toLocaleString()}
             </span>
+            <span className="w-10 text-right text-[11px] text-ink-muted tabular-nums shrink-0">
+              {totalUnits > 0 ? Math.round((cat.units / totalUnits) * 100) : 0}%
+            </span>
           </div>
         ))}
 
@@ -70,6 +74,7 @@ export function CategoryBreakdown({ categories }: { categories: CategoryData[] }
           <span className="w-16 text-right text-sm font-medium text-ink tabular-nums shrink-0">
             {totalUnits.toLocaleString()}
           </span>
+          <span className="w-10 text-right text-[11px] text-ink-muted tabular-nums shrink-0"></span>
         </div>
       </div>
     </SectionCard>

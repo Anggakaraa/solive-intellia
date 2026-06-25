@@ -217,11 +217,12 @@ export default async function AnalyticsDashboard(props: {
   const catAgg: Record<string, CategoryData> = {}
   for (const d of dishes) {
     const cat = d.category ?? 'Other'
-    if (!catAgg[cat]) catAgg[cat] = { name: cat, units: 0, margin: 0 }
-    catAgg[cat].units  += d.units
-    catAgg[cat].margin += d.margin
+    if (!catAgg[cat]) catAgg[cat] = { name: cat, units: 0, revenue: 0, margin: 0 }
+    catAgg[cat].units   += d.units
+    catAgg[cat].revenue += d.revenue
+    catAgg[cat].margin  += d.margin
   }
-  const categories = Object.values(catAgg).sort((a, b) => b.margin - a.margin)
+  const categories = Object.values(catAgg).sort((a, b) => b.revenue - a.revenue)
 
   const totalUnits  = dishes.reduce((s, d) => s + d.units,  0)
   const totalMargin = dishes.reduce((s, d) => s + d.margin, 0)

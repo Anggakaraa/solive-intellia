@@ -420,10 +420,10 @@ export default function ComponentLibraryPage() {
 
         <Label>CategoryBreakdown — server component table (shown here with mock data)</Label>
         <CategoryBreakdown categories={[
-          { name: 'Sharing Plates', units: 620, margin: 8_200_000 },
-          { name: 'Mains', units: 410, margin: 6_100_000 },
-          { name: 'Dessert', units: 280, margin: 3_400_000 },
-          { name: 'Sides', units: 190, margin: 1_800_000 },
+          { name: 'Sharing Plates', units: 620, revenue: 12_400_000, margin: 8_200_000 },
+          { name: 'Mains',          units: 410, revenue:  9_200_000, margin: 6_100_000 },
+          { name: 'Dessert',        units: 280, revenue:  5_600_000, margin: 3_400_000 },
+          { name: 'Sides',          units: 190, revenue:  2_800_000, margin: 1_800_000 },
         ]} />
 
         <Label>MarginMatrix — Chart.js bubble, log x-axis, quadrant annotation</Label>

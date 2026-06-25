@@ -3,7 +3,7 @@
 -- One transaction per day; items aggregated from POS daily summary.
 -- Drink items now resolve correctly (migration 043 added them to menu_items).
 
-INSERT INTO sales_imports (id, date_from, date_to, source_file) VALUES
+INSERT INTO sales_imports (id, date_from, date_to, source_filename) VALUES
   ('f04fbe09-c81f-4438-955c-a2f96dff858e', '2025-04-01', '2025-04-30', 'APRIL 2025.xlsx');
 
 INSERT INTO sales_transactions (id, date, import_id) VALUES

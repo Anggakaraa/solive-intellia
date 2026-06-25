@@ -174,7 +174,7 @@ export default async function AnalyticsDashboard(props: {
 
   // ── Build dish list ───────────────────────────────────
 
-  const dishes: DishAgg[] = Object.values(dishAgg)
+  const allDishes: DishAgg[] = Object.values(dishAgg)
     .filter((d) => d.units > 0)
     .map((d) => {
       const { trend: rollingTrend, upCount, downCount, windowSize, severityPct } =
@@ -200,6 +200,10 @@ export default async function AnalyticsDashboard(props: {
       }
     })
 
+  // Drinks excluded from best sellers, top contributors, and trend analysis —
+  // they are reconciliation data only, surfaced in category breakdown.
+  const dishes = allDishes.filter((d) => d.category !== 'Drinks')
+
   const bestSellers     = [...dishes].sort((a, b) => b.units  - a.units).slice(0, 5)
   const topContributors = [...dishes].sort((a, b) => b.margin - a.margin).slice(0, 5)
 
@@ -214,8 +218,9 @@ export default async function AnalyticsDashboard(props: {
     .sort((a, b) => a.severityPct - b.severityPct)
     .slice(0, 5)
 
+  // Category breakdown uses allDishes so drinks appear as their own category
   const catAgg: Record<string, CategoryData> = {}
-  for (const d of dishes) {
+  for (const d of allDishes) {
     const cat = d.category ?? 'Other'
     if (!catAgg[cat]) catAgg[cat] = { name: cat, units: 0, revenue: 0, margin: 0 }
     catAgg[cat].units   += d.units

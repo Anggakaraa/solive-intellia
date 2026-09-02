@@ -8,6 +8,7 @@ import type { ConceptCardData } from '@/components/ui/concept-card'
 import { SaveCollectionButton } from './SaveCollectionButton'
 import { CollectionOutput } from './CollectionOutput'
 import { ModedConceptsPanel } from './ModedConceptsPanel'
+import { RegenerateCollectionButton } from './RegenerateCollectionButton'
 import type { CollectionOutputData, RdConcept } from '@/lib/supabase/types'
 
 function toConceptCardData(row: Record<string, unknown>): ConceptCardData {
@@ -82,6 +83,14 @@ export default async function BriefOutputPage({ params }: { params: Promise<{ id
           ) : undefined
         ) : undefined}
       />
+
+      {isNewCollectionFormat && collectionOutputData && (
+        <RegenerateCollectionButton
+          briefId={id}
+          initialComposition={(brief.menu_composition as Record<string, number>) ?? {}}
+          aiRecommend={!!(brief as Record<string, unknown>).ai_recommend_composition}
+        />
+      )}
 
       {isNewCollectionFormat && collectionOutputData ? (
         /* New two-layer collection output */

@@ -109,7 +109,7 @@ export const maxDuration = 120
 
 export async function POST(req: NextRequest) {
   try {
-    const { briefId } = await req.json()
+    const { briefId, compositionOverride } = await req.json()
     if (!briefId) return NextResponse.json({ error: 'briefId required' }, { status: 400 })
 
     const supabase = await createClient()
@@ -130,7 +130,10 @@ export async function POST(req: NextRequest) {
       .limit(15)
     const recentConcepts = (recentRaw ?? []).map((r) => r.concept_name)
 
-    const userMessage = buildCollectionMessage(brief, recentConcepts)
+    const briefWithOverride = compositionOverride
+      ? { ...brief, menu_composition: compositionOverride, ai_recommend_composition: false }
+      : brief
+    const userMessage = buildCollectionMessage(briefWithOverride, recentConcepts)
     const estInputTokens = Math.round(SYSTEM_PROMPT.length / 3) + Math.round(userMessage.length / 4)
     console.log('[generate-collection] Calling Claude', {
       format: brief.collection_format ?? 'a_la_carte',
